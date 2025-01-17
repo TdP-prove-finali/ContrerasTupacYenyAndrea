@@ -264,7 +264,6 @@ class Model():
         self.s0 = sim.getRis()
         self.s1 = sim.getRetta()
         self.s2 = sim.getBEPeMDS()
-        self.s3 = sim.getMix()
 
     def getRis(self):
         return self.s0
@@ -272,5 +271,12 @@ class Model():
         return self.s1
     def getBEPeMDS(self):
         return self.s2
-    def getMix(self):
-        return self.s3
+
+
+
+
+
+
+
+
+

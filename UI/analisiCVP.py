@@ -26,6 +26,18 @@ class Page3(ft.View):
                                  on_click=self.controller3.update
                                  )
 
+        stampa = ft.IconButton(ft.icons.PRINT,
+                               tooltip="PRINT RESULT",
+                               style=ft.ButtonStyle(bgcolor={ft.ControlState.DEFAULT: "white",
+                                                             ft.ControlState.PRESSED: "bluegrey700",
+                                                             },
+                                                    color={ft.ControlState.DEFAULT: "bluegrey700",
+                                                           ft.ControlState.PRESSED: "white"}),
+                               icon_size=30,
+                               on_click=self.controller3.stampa
+                               )
+
+
         self._fig3a, self._axs3a = plt.subplots(1, 1, figsize=(6, 3))
         plt.rc('xtick', labelsize=8) # <-- per aggiustare la dimensione dei valori nelle ascisse e nelle ordinate
         plt.rc('ytick', labelsize=8)
@@ -49,7 +61,7 @@ class Page3(ft.View):
                          margin=ft.Margin(top=0, left=0, right=0, bottom=10),
                          padding=0
                          ),
-            self.row1(buttons, aggiorna),
+            self.row1(buttons, aggiorna, stampa),
             ft.Container(
                 ft.Text("RESULT",
                         style=ft.TextStyle(size=27,
@@ -116,12 +128,12 @@ class Page3(ft.View):
                         )
 
 
-    def row1(self, buttons, aggiorna):
+    def row1(self, buttons, aggiorna, stampa):
         return ft.Container(ft.Row([buttons,
                                     ft.Container(self._cf, width=100),
                                     ft.Container(width=30),
                                     ft.Container(self._target, width=100),
-                                    aggiorna
+                                    aggiorna, stampa
                                     ],
                                    scroll=ft.ScrollMode.ALWAYS,
                                    alignment=ft.MainAxisAlignment.CENTER,
@@ -145,9 +157,10 @@ class Page3(ft.View):
     def containerList(self):
         return ft.Container(ft.Column([self._l3a],
                                       scroll=ft.ScrollMode.ALWAYS,
+                                      alignment=ft.MainAxisAlignment.CENTER
                                       ),
                             bgcolor="white",
-                            width=380,
+                            width=450,
                             height=490,
                             padding=0,
                             margin=0,

@@ -1,10 +1,15 @@
 import flet as ft
 
 import numpy as np
+from model.stampa import printF
+
 class Controller:
     def __init__(self, view, model):
         self._model = model
         self._view = view
+
+        self._un = None
+        self._pw = None
 
         self._mese1 = []
         self._mese2 = []
@@ -23,12 +28,31 @@ class Controller:
         self.cf=None
         self.target=None
 
+    def getValore(self, line):
+        line = line.rstrip('\n')
+        word = line[line.index(':') + 1:]
+        word = word.replace(" ", "")
+        return word
 
     def login(self, e):
         """ metodo per verificare le credenziali di accesso """
 
+        password = self._view._pag0._password.value
+        username = self._view._pag0._username.value
+
+        # estraggo i codici d'accesso dal file txt
+        if self._un==None or self._pw==None:
+            file = open("UI/codici.txt", "r")
+            lines = file.readlines()
+            for line in lines:
+                if line.startswith('USERNAME'):
+                    self._un = self.getValore(line)
+                if line.startswith('PASSWORD'):
+                    self._pw = self.getValore(line)
+            file.close()
+
         # 1.controllo: password sbagliata
-        if self._view._pag0._username.value == "admin" and self._view._pag0._password.value != "0000":
+        if username == self._un and password != self._pw:
             # visualizzero eventuali messaggi di errore
             self._view._page.open(ft.AlertDialog(
                 content=ft.Text("LOGIN FAILED\nincorrect password", text_align=ft.TextAlign.CENTER),
@@ -39,12 +63,13 @@ class Controller:
                                                 ),
                 bgcolor="deeporange400",
             ))
+            return
 
         # 2. controllo: username sbagliato
-        elif self._view._pag0._username.value != "admin" and self._view._pag0._password.value == "0000":
+        elif username != self._un and password == self._pw:
             # visualizzero eventuali messaggi di errore
             self._view._page.open(ft.AlertDialog(
-                content=ft.Text("LOGIN FAILED\nincorrect username",text_align=ft.TextAlign.CENTER),
+                content=ft.Text("LOGIN FAILED\nincorrect username", text_align=ft.TextAlign.CENTER),
                 content_text_style=ft.TextStyle(color="white",
                                                 size=18,
                                                 weight=ft.FontWeight.BOLD,
@@ -53,9 +78,10 @@ class Controller:
                 bgcolor="deeporange400",
 
             ))
+            return
 
         # 3. controllo: username e password sbagliati
-        elif self._view._pag0._username.value != "admin" and self._view._pag0._password.value != "0000":
+        elif username != self._un and password != self._pw:
             # visualizzero eventuali messaggi di errore
             self._view._page.open(ft.AlertDialog(
                 content=ft.Text("LOGIN FAILED\nplease verify your credentials", text_align=ft.TextAlign.CENTER),
@@ -66,10 +92,9 @@ class Controller:
                                                 ),
                 bgcolor="deeporange400",
             ))
+            return
 
-        # superamento dei controlli, l'utente viene indirizzato alla pagina successiva
-        else:
-            self._view._page.go("/page1")
+        self._view._page.go("/page1")
 
         self._view._page.update()
 
@@ -362,7 +387,13 @@ class Controller:
     def ordine1(self, e):
         """ metodo per ordinare le tabelle dei prodotti e dei negozi in base alla colonna selezionata"""
 
-        e.control.parent.__setattr__("sort_column_index", e.column_index),
+        e.control.parent.__setattr__("sort_column_index", e.column_index)
+
+        # Toggle the sort (ascending / descending)
+        if e.control.parent.sort_ascending:
+            e.control.parent.__setattr__("sort_ascending", False)
+        else:
+            e.control.parent.__setattr__("sort_ascending", True)
 
         # Sort the table rows according above
 
@@ -370,13 +401,6 @@ class Controller:
             e.control.parent.rows.sort(key=lambda x: x.cells[e.column_index].content.value, reverse=e.control.parent.sort_ascending)
         else:
             e.control.parent.rows.sort(key=lambda x: float(x.cells[e.column_index].content.value), reverse=e.control.parent.sort_ascending)
-
-            # Toggle the sort (ascending / descending)
-
-        if e.control.parent.sort_ascending:
-            e.control.parent.__setattr__("sort_ascending", False)
-        else:
-            e.control.parent.__setattr__("sort_ascending", True)
 
 
         # aggiornare la tabella
@@ -521,7 +545,13 @@ class Controller:
     def ordine2(self, e):
         """ metodo per ordinare le tabelle dei prodotti e dei negozi in base alla colonna selezionata"""
 
-        e.control.parent.__setattr__("sort_column_index", e.column_index),
+        e.control.parent.__setattr__("sort_column_index", e.column_index)
+
+        # Toggle the sort (ascending / descending)
+        if e.control.parent.sort_ascending:
+            e.control.parent.__setattr__("sort_ascending", False)
+        else:
+            e.control.parent.__setattr__("sort_ascending", True)
 
         # Sort the table rows according above
         if e.column_index == 0:
@@ -531,11 +561,7 @@ class Controller:
             e.control.parent.rows.sort(key=lambda x: float(x.cells[e.column_index].content.value),
                                        reverse=e.control.parent.sort_ascending)
 
-        # Toggle the sort (ascending / descending)
-        if e.control.parent.sort_ascending:
-            e.control.parent.__setattr__("sort_ascending", False)
-        else:
-            e.control.parent.__setattr__("sort_ascending", True)
+
 
         # aggiornare la tabella
         e.control.parent.update()
@@ -693,17 +719,18 @@ class Controller:
         self._view._pag3._l3a.controls.append(
             ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER))
 
-       #controllo input:
+        #controllo input:
         self.controlloInput()
+
         # avvio la simulazione
         self._model.simula(self._view._ddShop.value, int(self._view._ddAnno.value), int(self._view._ddMese.value), self.cf, self.target)
-        # prelevo il risultato della simulazione
-        q, r, c, wamdc = self._model.getRis()
-        qbep, rbep, mds = self._model.getBEPeMDS()
-        mdsq=q-qbep
-        ro = r - c - self.cf
 
-        x1 = np.linspace(0, q + qbep)
+        Pname, q, r, mixx = self._model.getRis()
+        qbep, rbep, mds, ro = self._model.getBEPeMDS()
+
+        mdsq = sum(q)-qbep
+
+        x1 = np.linspace(0, sum(q) + qbep)
         y = self._model.getRetta()
         # proietto il risultato nel grafico
         self._view._pag3._axs3a.plot(x1, y[0], ls="-", linewidth=1, label='REVENUE')
@@ -730,12 +757,15 @@ class Controller:
 
         # se target è uguale a zero allora si aggiungeranno altre indicazioni
         if self.target == 0:
-            self._view._pag3._axs3a.plot([q, q], [(c + self.cf), r], ls="--", linewidth=2, color="g", label=f'RO')
+            self._view._pag3._axs3a.plot([sum(q), sum(q)], [(sum(r)-ro), sum(r)], ls="--", linewidth=2, color="g", label=f'RO')
             self._view._pag3._l3a.controls.append(ft.Text(f"the PROFIT is {ro:1.2f} in sales", size=17, text_align=ft.TextAlign.CENTER))
-            if self.cf < (r - c):
-                self._view._pag3._axs3a.plot([q, qbep], [0, 0], ls="--", linewidth=2, color="m", label=f'MDS')
-                self._view._pag3._axs3a.plot([0, 0], [r, rbep], ls="--", linewidth=2, color="m")
+            if ro > 0:
+                self._view._pag3._axs3a.plot([sum(q), qbep], [0, 0], ls="--", linewidth=2, color="m", label=f'MDS')
+                self._view._pag3._axs3a.plot([0, 0], [sum(r), rbep], ls="--", linewidth=2, color="m")
                 self._view._pag3._l3a.controls.append(ft.Text(f"the MARGIN OF SAFETY is:\n{mds:1.2f} in sales e {int(mdsq)} in unit", size=17, text_align=ft.TextAlign.CENTER))
+
+            self._view._pag3._l3a.controls.append(
+                ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER))
 
         self._view._pag3._axs3a.set_title(f"BREAK-EVEN CHART", fontdict={'size': 15, 'color': "INDIGO"})
         self._view._pag3._axs3a.legend(
@@ -748,15 +778,15 @@ class Controller:
             shadow=True
         )
 
-        self._view._pag3._axs3a.hlines(y=[rbep, r], xmin=[0, 0],
-                                        xmax=[qbep, q], color='lightgrey',
+        self._view._pag3._axs3a.hlines(y=[rbep, sum(r)], xmin=[0, 0],
+                                        xmax=[qbep, sum(q)], color='lightgrey',
                                         linestyle='--', linewidth=0.5)
-        self._view._pag3._axs3a.vlines(x=[qbep, q], ymin=[0, 0], ymax=[rbep, r], color='lightgrey', linestyle='--',
+        self._view._pag3._axs3a.vlines(x=[qbep, sum(q)], ymin=[0, 0], ymax=[rbep, sum(r)], color='lightgrey', linestyle='--',
                                            linewidth=0.5)
 
         # imposto i valori che si visualizzeranno negli assi
-        n1 = [0, int(q)]
-        n2 = [0, r, self.cf]
+        n1 = [0, int(sum(q))]
+        n2 = [0, sum(r), self.cf]
         self._view._pag3._axs3a.set_xticks(n1)
         self._view._pag3._axs3a.set_yticks(n2, labels=[f"{i:1.2f}" for i in n2])
         self._view._pag3._axs3a.annotate('unit', xy=(1, 0), ha='left', va='top', xycoords='axes fraction', fontsize=14)
@@ -764,13 +794,11 @@ class Controller:
                      textcoords='offset points', fontsize=14)
 
     def c9(self):
-        """ metodo per proiettare i risultati nell'analisi CVP in forma testuale"""
+        """ metodo per proiettare il mix(ideale) dei ricavi per ogni prodotto"""
 
-        self._view._pag3._l3a.controls.append(ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER))
         #richiamo il model
-
-        qbep, rbep, mds = self._model.getBEPeMDS()
-        Pname, qty = self._model.getMix()
+        Pname, q, r, mixx = self._model.getRis()
+        qbep, rbep, mds, ro = self._model.getBEPeMDS()
 
         # controllo se il target sia diverso da zero
         # 1. viene mostrato il BEP
@@ -778,23 +806,59 @@ class Controller:
             self._view._pag3._l3a.controls.append(ft.Text(f"SALES ${rbep:1.2f} are required to BREAK EVEN", size=16, text_align=ft.TextAlign.CENTER))
             self._view._pag3._l3a.controls.append(ft.Text(
                 f"The SALES of EACH TOYS must be:", size=16, text_align=ft.TextAlign.CENTER))
-            for i in range(len(qty)):
-                t = qty[i] * rbep
-                self._view._pag3._l3a.controls.append(ft.Text(f"{Pname[i]} --> ${t:1.2f}", size=16, text_align=ft.TextAlign.CENTER))
+            for i in range(len(mixx)):
+                self._view._pag3._l3a.controls.append(ft.Text(f"{Pname[i]}: ${r[i]:1.2f} --> ${mixx[i]:1.2f}", size=16, text_align=ft.TextAlign.CENTER))
         # 2. viene mostrato il profit target
         elif self.target > 0:
             self._view._pag3._l3a.controls.clear()
+            self._view._pag3._l3a.controls.append(
+                ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER, color="transparent"))
             self._view._pag3._l3a.controls.append(ft.Text(
-                f"SALES ${rbep:1.2f} are required to make a PROFIT of ${self.target}", size=16, text_align=ft.TextAlign.CENTER))
+                f"SALES ${rbep:1.2f} are required\nto make a PROFIT of ${self.target}", size=16, text_align=ft.TextAlign.CENTER))
             self._view._pag3._l3a.controls.append(ft.Text(
                 f"the SALES of EACH TOYS must be:", size=16, text_align=ft.TextAlign.CENTER))
-            for i in range(len(qty)):
-                t = qty[i] * rbep
-                self._view._pag3._l3a.controls.append(ft.Text(f"{Pname[i]} --> ${t:1.2f} ", size=16, text_align=ft.TextAlign.CENTER))
+            for i in range(len(mixx)):
+                self._view._pag3._l3a.controls.append(ft.Text(f"{Pname[i]}: ${r[i]:1.2f} --> ${mixx[i]:1.2f} ", size=16, text_align=ft.TextAlign.CENTER))
 
         self._view._pag3._l3a.controls.append(
-            ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER, color="transparent"))
+            ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER,
+                    color="transparent"))
 
 
+    def stampa(self, e):
+        """ metodo per confermare di voler stampare il risultato della simulazione in forma tabellare"""
 
+        self.alertDialog=ft.AlertDialog(title=ft.Text("Please indicate the name\nyou wish to give to the file", text_align=ft.TextAlign.CENTER),
+                                             content=ft.TextField(bgcolor="white"),
+                                             actions=[
+                                                 ft.TextButton("CONFIRM",
+                                                               style=ft.ButtonStyle(color={ft.ControlState.DEFAULT: "indigo",
+                                                                                           ft.ControlState.PRESSED: "indigo900"}
+                                                                                    ),
+                                                               on_click=self.action),
+                                                 ft.TextButton("DELETE",style=ft.ButtonStyle(color={ft.ControlState.DEFAULT: "red",
+                                                                                           ft.ControlState.PRESSED: "red900"}), on_click=self.action),
+                                             ],
+                                        bgcolor="bluegrey300"
+                                        )
+        self._view._page.open(self.alertDialog)
+
+
+        self._view._page.update()
+
+    def action(self, e):
+        self._view._page.close(self.alertDialog)
+
+        if e.control.text=="CONFIRM":
+            Pname, q, r, mixx = self._model.getRis()
+            qbep, rbep, mds, ro = self._model.getBEPeMDS()
+
+            #prendo il nome con cui l'utente vuole salvare il file
+            nameFile=self.alertDialog.content.value
+            self._view._page.snack_bar = ft.SnackBar(ft.Text("The document has been saved successfully", style=ft.TextStyle(size=17, color="white", weight=ft.FontWeight.BOLD), text_align=ft.TextAlign.CENTER), bgcolor="blueblack")
+            self._view._page.snack_bar.open = True
+
+            printF(self.cf, self.target, Pname, q, r, mixx, qbep, rbep, mds, ro, nameFile)
+
+        self._view._page.update()
 

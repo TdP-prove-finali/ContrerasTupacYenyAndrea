@@ -68,7 +68,7 @@ class Page2(ft.View):
                             alignment=ft.MainAxisAlignment.CENTER
                             )
 
-        c2= self.box(self.scrollY([txt1, self._r21c]), 480, 280)  # <-- 3box
+        c2= self.box(self.scrollY([txt1, self._r21c]), 480, 290)  # <-- 3box
 
         cl2=ft.Container(self.scrollY([c1,c2]), height=500)  # <-- 2col
 
@@ -84,7 +84,7 @@ class Page2(ft.View):
         # 2.TABELLA PRODOTTI
         t2=self.createText2("LIST OF ALL PRODUCTS")
         self._tabella21a = self.createTable("PRODUCT", self._controller.ordine1)
-        l21a = ft.Container(self.scrollY([self._tabella21a]), height=140, padding=4)
+        l21a = ft.Container(self.scrollY([self._tabella21a]), height=150, padding=4)
 
         bt1=self.createButton("UPDATE CHART", self._controller.aggiornaGrafico1)
 
@@ -101,7 +101,7 @@ class Page2(ft.View):
         # 1.TABELLA NEGOZI
         t3 = self.createText2("LIST OF ALL STORES")
         self._tabella21b = self.createTable("STORE ", self._controller.ordine2)
-        l21b = ft.Container(self.scrollY([self._tabella21b]), height=140, padding=5)
+        l21b = ft.Container(self.scrollY([self._tabella21b]), height=150, padding=5)
 
         bt2 = self.createButton("UPDATE CHART", self._controller.aggiornaGrafico2)
 
@@ -206,9 +206,9 @@ class Page2(ft.View):
 
     def scrollY(self, controls):
         scroll= ft.Column(controls,
-                         scroll=ft.ScrollMode.ALWAYS,
-                         alignment=ft.MainAxisAlignment.CENTER,
-                          horizontal_alignment=ft.CrossAxisAlignment.CENTER # <-- per alineare orizzontalemnte
+                          scroll=ft.ScrollMode.ALWAYS,
+                          alignment=ft.MainAxisAlignment.CENTER,
+                          horizontal_alignment=ft.CrossAxisAlignment.CENTER # <-- per alineare orizzontalmente
                          )
         return scroll
     def box(self, content, width, height):
@@ -291,7 +291,7 @@ class Page2(ft.View):
         return ft.Container(
             content,
             alignment=ft.Alignment(0, 0),
-            margin=5
+            margin=4
         )
 
 

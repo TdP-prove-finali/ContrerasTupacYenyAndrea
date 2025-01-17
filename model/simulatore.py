@@ -15,51 +15,48 @@ class Simulatore:
         while (len(self.ris)==0):
             self.processo()
 
-
     def processo(self):
-        self.Pname = self.lista[0]
+        Pname = self.lista[0]
         qty = self.lista[1]
         rr = self.lista[2]
         cv = self.lista[3]
-        q = sum(qty)
-        r = sum(rr)
-        c = sum(cv)
+
+        self.ro=sum(rr)-sum(cv)-self.cf
+
+        wamdcr=(sum(rr) - sum(cv)) / sum(rr)  # un altro modo: mdcratio(mdcu/p) * salesmix(rr[i]/sum[rr])
+        self.rbep = (self.cf + self.target) / wamdcr
+
         mdcu = []
         wamdc = []
-        self.mixx = []
+        mixx = []
 
         for i in range(len(qty)):
+            # per ricavare il MDC in unita per Qbep
             u = (rr[i] - cv[i]) / qty[i]
             mdcu.append(u)
-            mixu = qty[i] / q
-            t = mixu * u
-            wamdc.append(t)
-            mixr = rr[i] / r
-            self.mixx.append(mixr)
+            mixu = qty[i] / sum(qty) # <-- sales mix in % unit
+            t1 = mixu * u
+            wamdc.append(t1)
+            # per ricavare il ricavo da ottenre per ogni prodotto
+            mixr = rr[i] / sum(rr) #  <-- sales mix in % $
+            rbepi = mixr * self.rbep
+            mixx.append(rbepi)
 
-        self.ris = (q, r, c, wamdc)
+        self.qbep = (self.cf + self.target) / sum(wamdc)
+        self.mds = sum(rr) - self.rbep
+
+        self.ris = (Pname, qty, rr, mixx)
 
     def getRis(self):
         return self.ris
 
-    def getMix(self):
-        return self.Pname, self.mixx
-
     def getBEPeMDS(self):
-        r=self.ris[1]
-        c=self.ris[2]
-        wamdc=sum(self.ris[3])
-
-        rbep = (self.cf + self.target) / ((r - c) / r)
-        qbep = (self.cf + self.target) / (wamdc)
-        mds = r - rbep
-
-        return qbep, rbep, mds
+        return self.qbep, self.rbep, self.mds, self.ro
 
 
     def getRetta(self):
-        q=self.ris[0]
-        qbep, rbep, mds= self.getBEPeMDS()
+        q=sum(self.ris[1])
+        qbep, rbep, mds, ro = self.getBEPeMDS()
         x1 = np.linspace(0, q + qbep)
         y = []
 

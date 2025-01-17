@@ -10,8 +10,8 @@ class View(ft.UserControl):
         super().__init__()
         self._page = page
         self._page.title = "TESI: Sotware a supporto del processo decisionale"
-        self._page.window_min_width=500
-        self._page.window_min_height=700
+        self._page.window_min_width=400
+        self._page.window_min_height=500
 
         self._controller = None
 
