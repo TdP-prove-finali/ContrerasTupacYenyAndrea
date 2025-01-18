@@ -1,5 +1,5 @@
 CONTRERAS YENY
-Software per il supporto del processo ...
+Software a supporto del processo decisionale
 
 Istruzioni per l'installazione e l’utilizzo dell’applicazione:
 - Effettuare il fork del progetto al seguente link URI: https://github.com/TdP-prove-finali/ContrerasTupacYenyAndrea.git sul proprio account GitHub
