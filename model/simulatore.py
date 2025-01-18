@@ -19,11 +19,10 @@ class Simulatore:
         Pname = self.lista[0]
         qty = self.lista[1]
         rr = self.lista[2]
-        cv = self.lista[3]
+        mdc = self.lista[3]
+        self.ro=sum(mdc)-self.cf
 
-        self.ro=sum(rr)-sum(cv)-self.cf
-
-        wamdcr=(sum(rr) - sum(cv)) / sum(rr)  # un altro modo: mdcratio(mdcu/p) * salesmix(rr[i]/sum[rr])
+        wamdcr=sum(mdc) / sum(rr)  # un altro modo: mdcratio(mdcu/p) * salesmix(rr[i]/sum[rr])
         self.rbep = (self.cf + self.target) / wamdcr
 
         mdcu = []
@@ -32,7 +31,7 @@ class Simulatore:
 
         for i in range(len(qty)):
             # per ricavare il MDC in unita per Qbep
-            u = (rr[i] - cv[i]) / qty[i]
+            u = (mdc[i]) / qty[i]
             mdcu.append(u)
             mixu = qty[i] / sum(qty) # <-- sales mix in % unit
             t1 = mixu * u

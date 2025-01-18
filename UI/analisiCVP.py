@@ -12,7 +12,7 @@ class Page3(ft.View):
         self.page = page
         self.controller3=controller
 
-        self._cf = self.createTextField(' CF ', '8000')
+        self._cf = self.createTextField(' CF ', '4000')
         self._target = self.createTextField(" TARGET ",'0')
 
         aggiorna = ft.IconButton(ft.icons.UPDATE,

@@ -12,7 +12,7 @@ def printF( cf, target, listP, qty, revenue, mixx, qbep, rbep, mds, ro, nameFile
     l1 += f'<h7> (the fix cost=$ {cf}, the target=$ {target} and the quantity is specified in the table) </h7>'
     if target == 0:
         l1 += f'<dl><dt>the SALES is $ {sum(r):1.2f}</dt>'
-        l1 += f'<dl><dt>the PROFIT is {ro:1.2f} in sales </dt>'
+        l1 += f'<dl><dt>the OPERATING INCOME is {ro:1.2f} in sales </dt>'
         if ro>0:
             l1 += f'<dt> the MARGIN OF SAFETY is {mds:1.2f} in sales </dt>'
             l1 += f'<dt> -------------------------------------------------'
@@ -31,7 +31,7 @@ def printF( cf, target, listP, qty, revenue, mixx, qbep, rbep, mds, ro, nameFile
             <html>
             <head>
                 <title><center> RESULT SIMULATION </center></title>
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
             </head>
             <body>
                 <div class="container" style="text-align:center; ">

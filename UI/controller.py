@@ -758,7 +758,7 @@ class Controller:
         # se target è uguale a zero allora si aggiungeranno altre indicazioni
         if self.target == 0:
             self._view._pag3._axs3a.plot([sum(q), sum(q)], [(sum(r)-ro), sum(r)], ls="--", linewidth=2, color="g", label=f'RO')
-            self._view._pag3._l3a.controls.append(ft.Text(f"the PROFIT is {ro:1.2f} in sales", size=17, text_align=ft.TextAlign.CENTER))
+            self._view._pag3._l3a.controls.append(ft.Text(f"the OPERATING INCOME is {ro:1.2f} in sales", size=17, text_align=ft.TextAlign.CENTER))
             if ro > 0:
                 self._view._pag3._axs3a.plot([sum(q), qbep], [0, 0], ls="--", linewidth=2, color="m", label=f'MDS')
                 self._view._pag3._axs3a.plot([0, 0], [sum(r), rbep], ls="--", linewidth=2, color="m")
@@ -814,7 +814,7 @@ class Controller:
             self._view._pag3._l3a.controls.append(
                 ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER, color="transparent"))
             self._view._pag3._l3a.controls.append(ft.Text(
-                f"SALES ${rbep:1.2f} are required\nto make a PROFIT of ${self.target}", size=16, text_align=ft.TextAlign.CENTER))
+                f"SALES ${rbep:1.2f} are required\nto make an OPERATING INCOME of ${self.target}", size=16, text_align=ft.TextAlign.CENTER))
             self._view._pag3._l3a.controls.append(ft.Text(
                 f"the SALES of EACH TOYS must be:", size=16, text_align=ft.TextAlign.CENTER))
             for i in range(len(mixx)):
