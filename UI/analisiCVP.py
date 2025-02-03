@@ -18,7 +18,7 @@ class Page3(ft.View):
         self.close_figures()
 
         # Creazione campi di testo
-        self.cf = self.create_text_field(' CF ', '3650')
+        self.cf = self.create_text_field(' CF ', '4000')
         self.target = self.create_text_field(" TARGET ", '0')
         self.vQty = self.create_text_field(" ΔQty(%) ", None)
         self.vPr = self.create_text_field(" ΔPrice(%) ", None)

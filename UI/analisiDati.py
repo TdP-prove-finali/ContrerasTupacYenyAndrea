@@ -79,7 +79,7 @@ class Page2(ft.View):
         # OVERVIEW
         cl1 = self.box(self.scroll_y([self.chart2a]), 680, 500)  # <-- 1box=1col
         bx2 = self.box(self.scroll_y([self.t1, rw1]), 480, 200)  # <-- 2box
-        bx3 = self.box(self.scroll_y([t2, self.c3]), 480, 280)  # <-- 3box
+        bx3 = self.box(self.scroll_y([t2, self.c3]), 480, 290)  # <-- 3box
         cl2 = ft.Container(self.scroll_y([bx2, bx3]), height=500)  # <-- 2col
         # PRODUCT ----------------------------------------------------------------------------------------------
         cl3 = self.box(self.scroll_y([t3, self.chart2b]), 510, 500)  # <-- 1col
