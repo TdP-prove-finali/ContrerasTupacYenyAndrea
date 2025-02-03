@@ -1,15 +1,16 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Negozi:
-    Store_ID: int
-    Store_Name: str
-    Store_City: str
-    Store_Location: str
-    Store_Open_Date: int
+    store_ID: int
+    store_name: str
+    store_city: str
+    store_location: str
+    store_open_date: int
 
     def __hash__(self):
-        return hash(self.Store_ID)
+        return hash(self.store_name)
 
     def __str__(self):
-        return f"{self.Store_Name} : {self.Store_City}, {self.Store_Location}"
+        return f"{self.store_name}"

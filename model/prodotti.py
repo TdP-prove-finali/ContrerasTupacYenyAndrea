@@ -1,15 +1,16 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Prodotti:
-    Product_ID: int
-    Product_Name: str
-    Product_Category: str
-    Product_Cost: str
-    Product_Price: int
+    product_ID: int
+    product_name: str
+    product_category: str
+    product_cost: str
+    product_price: int
 
     def __hash__(self):
-        return hash(self.Product_ID)
+        return hash(self.product_ID)
 
     def __str__(self):
-        return f"{self.Product_Name} : {self.Product_Category}, {self.Product_Price}, {self.Product_Cost}"
+        return f"{self.product_name} : {self.product_category}, {self.product_price}, {self.product_cost}"

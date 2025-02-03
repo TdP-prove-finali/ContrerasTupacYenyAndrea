@@ -1,31 +1,29 @@
 from dataclasses import dataclass
 
+
 @dataclass
-class ProdByStore:#shop
-    _Pname:str
-    _Sname:str
+class ProdByStore:
+    _nameP: str
+    _nameS: str
     _stock: int
     _qtySell: int
     _revenue: float
     _cv: float
 
-
-
+    @property
+    def name_prod(self):
+        return self._nameP
 
     @property
-    def Pname(self):
-        return self._Pname
-
-    @property
-    def Sname(self):
-        return self._Sname
+    def name_store(self):
+        return self._nameS
 
     @property
     def stock(self):
         return self._stock
 
     @property
-    def qtySell(self):
+    def qty_sell(self):
         return self._qtySell
 
     @property
@@ -36,9 +34,8 @@ class ProdByStore:#shop
     def cv(self):
         return self._cv
 
-
     def __hash__(self):
-        return hash(self._Pname)
+        return hash(self._nameP)
 
     def __str__(self):
-        return f"{self._Pname}"
+        return f"{self._nameP}"

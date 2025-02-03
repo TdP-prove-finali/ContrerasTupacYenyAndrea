@@ -5,130 +5,58 @@ from UI.home import Page1
 from UI.analisiDati import Page2
 from UI.analisiCVP import Page3
 
+
 class View(ft.UserControl):
     def __init__(self, page: ft.Page):
         super().__init__()
-        self._page = page
-        self._page.title = "TESI: Sotware a supporto del processo decisionale"
-        self._page.window_min_width=400
-        self._page.window_min_height=500
+        self.page = page
+        self.page.title = "TESI: Sotware a supporto del processo decisionale"
+        self.page.window_min_width = 400
+        self.page.window_min_height = 500
 
         self._controller = None
 
-
     def load_interface(self):
-        self._ddLoc = ft.Dropdown(label=" LOCATION ",
-                                     value="Airport",
-                                     border_color="black",
-                                     text_style=ft.TextStyle(italic=True,
-                                                             size=15,
-                                                             color=ft.colors.BLACK,
-                                                             weight=ft.FontWeight.BOLD),
-                                     border_radius=9,
-                                     bgcolor="white",
-                                     label_style=ft.TextStyle(italic=True,
-                                                              size=15,
-                                                              bgcolor="white",
-                                                              letter_spacing=3,
-                                                              color=ft.colors.BLACK,  # colore del testo sopra il box
-                                                              weight=ft.FontWeight.BOLD),
+        """ Carica l'interfaccia e imposta le funzioni per il cambio pagina"""
 
-                                     on_change=self._controller.fillShop,
-                                     width=155,
+        # creazione pulsanti
+        self.ddLoc = self.create_dd(" LOCATION ", 155, click=self._controller.update_store)
+        self.ddShop = self.create_dd(" STORE ", 260)
+        self.ddAnno = self.create_dd(" YEAR ", 90, click=self._controller.update_mese)
+        self.ddMese = self.create_dd(" MONTH ", 120)
 
-                                     )
+        # creazione contenitore pulsanti
+        self.pulsanti1 = self.create_container([self.ddLoc, self.ddAnno], 260)
+        self.pulsanti2 = self.create_container([self.ddLoc, self.ddShop, self.ddAnno, self.ddMese], 660)
 
-        self._ddShop = ft.Dropdown(label=" STORE ",
-                                  value="Maven Toys Ciudad de Mexico 2",
-                                  border_color="black",
-                                  text_style=ft.TextStyle(italic=True,
-                                                          size=15,
-                                                          color=ft.colors.BLACK,
-                                                          weight=ft.FontWeight.BOLD),
-                                  width=260,
-                                  border_radius=9,
-                                  bgcolor="white",
-                                  label_style=ft.TextStyle(italic=True,
-                                                           size=15,
-                                                           bgcolor="white",
-                                                           letter_spacing=3,
-                                                           color=ft.colors.BLACK,  # colore del testo sopra il box
-                                                           weight=ft.FontWeight.BOLD
-                                                           ),
-                                  )
+        self._controller.fill_dd()
 
-        self._ddAnno = ft.Dropdown(label=" YEAR ",
-                                   value="2022",
-                                   border_color="black",
-                                   text_style=ft.TextStyle(italic=True,
-                                                           size=15,
-                                                           color=ft.colors.BLACK,
-                                                           weight=ft.FontWeight.BOLD),
-                                   width=90,
-                                   border_radius=9,
-                                   bgcolor="white",
-                                   label_style=ft.TextStyle(italic=True,
-                                                            size=15,
-                                                            bgcolor="white",
-                                                            letter_spacing=3,
-                                                            color=ft.colors.BLACK,
-                                                            weight=ft.FontWeight.BOLD),
-                                   on_change=self._controller.fillMese
-                                   )
+        def route_change(route):
+            """ Creo le pagine necessarie per l'applicazione """
+            self.page.views.clear()
 
-        self._ddMese = ft.Dropdown(label=" MONTH ",
-                                   value="1",
-                                   border_color="black",
-                                   text_style=ft.TextStyle(italic=True,
-                                                           size=15,
-                                                           color=ft.colors.BLACK,
-                                                           weight=ft.FontWeight.BOLD),
-                                   width=120,
+            self.pag0 = Page0(self.page, self._controller)
+            self.pag1 = Page1(self.page)
+            self.pag2 = Page2(self.page, self._controller, self.pulsanti1)
+            self.pag3 = Page3(self.page, self._controller, self.pulsanti2)
 
-                                   border_radius=9,
-                                   bgcolor="white",
-                                   label_style=ft.TextStyle(italic=True,
-                                                            size=15,
-                                                            bgcolor="white",
-                                                            letter_spacing=2,
-                                                            color=ft.colors.BLACK,
-                                                            weight=ft.FontWeight.BOLD),
+            # Carico la prima pagina da visualizzare
+            self.page.views.append(self.pag0)
 
-                                   )
+            # Richiamo la funzione per cambiare la pagina
+            self._controller.change_page()
 
+            self.page.update()
 
-        self.pulsanti1 = ft.Container(ft.Row([self._ddLoc,self._ddAnno],
-                                             alignment=ft.MainAxisAlignment.CENTER),
-                                      width=260,
-                                      )
-        self.pulsanti2 = ft.Container(ft.Row([self._ddLoc, self._ddShop, self._ddAnno, self._ddMese],
-                                             alignment=ft.MainAxisAlignment.CENTER),
-                                      width=660)
-        self._controller.fillDD()
-        def route_change(route): #<--- funzione per cambiare pagina
-            self._page.views.clear()
+        def view_pop(view):
+            """ Funzione per cancellare la pagina precedente"""
+            self.page.views.pop()  # rimuovere l'ultima vista dalla pila delle viste della pagina
+            top_view = self.page.views[-1]  # ricavo la vista attualmente in cima alla pila dopo la rimozione
+            self.page.go(top_view.route)  # vado alla vista attualmente in cima
 
-            self._pag0 = Page0(self._page, self._controller)
-            self._pag1 = Page1(self._page)
-            self._pag2 = Page2(self._page, self._controller, self.pulsanti1)
-            self._pag3 = Page3(self._page, self._controller, self.pulsanti2)
-
-            self._page.views.append(self._pag0)
-
-            self._controller.changePage()
-            self._page.update()
-
-        def view_pop(view): #<--- funzione per cancellare la pagina precedente
-            self._page.views.pop()
-            top_view = self._page.views[-1]
-            self._page.go(top_view.route)
-
-
-        self._page.on_route_change = route_change
-        self._page.on_view_pop = view_pop
-        self._page.go(self._page.route)
-
-
+        self.page.on_route_change = route_change
+        self.page.on_view_pop = view_pop
+        self.page.go(self.page.route)
 
     @property
     def controller(self):
@@ -142,4 +70,29 @@ class View(ft.UserControl):
         self._controller = controller
 
     def update_page(self):
-        self._page.update()
+        self.page.update()
+
+    def create_dd(self, testo, width, click=None):
+        return ft.Dropdown(label=testo,
+                           border_color="black",
+                           text_style=ft.TextStyle(italic=True,
+                                                   size=15,
+                                                   color=ft.colors.BLACK,
+                                                   weight=ft.FontWeight.BOLD),
+                           border_radius=9,
+                           bgcolor="white",
+                           label_style=ft.TextStyle(italic=True,
+                                                    size=15,
+                                                    bgcolor="white",
+                                                    letter_spacing=3,
+                                                    color=ft.colors.BLACK,
+                                                    weight=ft.FontWeight.BOLD),
+                           on_change=click,
+                           width=width,
+                           )
+
+    def create_container(self, control, width):
+        return ft.Container(ft.Row(control, alignment=ft.MainAxisAlignment.CENTER),
+                            width=width,
+                            )
+

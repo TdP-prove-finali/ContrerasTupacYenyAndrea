@@ -5,17 +5,18 @@ from model.prodotti import Prodotti
 from model.negozi import Negozi
 from model.andamentoNegozio import AndamentoNegozio
 
-class DAO():
+
+class DAO:
     @staticmethod
-    def YYeMM():
+    def date_transiction():
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select YEAR(ss.`Date`) as yy, month(ss.`Date`) as mm
+        query = """select YEAR(ss.`date`) as yy, month(ss.`date`) as mm
                     from toysales.sales ss
-                    group by YEAR(ss.`Date`), month(ss.`Date`) """
+                    group by YEAR(ss.`date`), month(ss.`date`) """
 
         cursor.execute(query)
 
@@ -28,13 +29,13 @@ class DAO():
         return result
 
     @staticmethod
-    def AllProducts():
+    def all_products():
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = "SELECT * FROM toysales.products p ORDER BY p.Product_Category"
+        query = "SELECT * FROM toysales.products p ORDER BY p.product_category"
 
         cursor.execute(query, ())
 
@@ -47,13 +48,13 @@ class DAO():
         return result
 
     @staticmethod
-    def AllStores():
+    def all_stores():
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = "SELECT * FROM toysales.stores s ORDER BY s.Store_Location"
+        query = "SELECT * FROM toysales.stores s ORDER BY s.store_location"
 
         cursor.execute(query, ())
 
@@ -65,19 +66,19 @@ class DAO():
 
         return result
 
-
     @staticmethod
-    def andamentoProdotti(loc, anno):
+    def andamento_prodotti(loc, anno):
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select month(ss.`Date`) as mm, p.Product_Name as Pname,  p.Product_Category as category,sum(ss.Units) as qty, (p.Product_Price*sum(ss.Units)) as revenue, (p.Product_Cost*sum(ss.Units)) as cv
-                        from toysales.sales ss, toysales.stores s , toysales.products p 
-                        where  s.Store_Location=%s and year(ss.`Date`)=%s and ss.Store_ID =s.Store_ID and ss.Product_ID =p.Product_ID 
-                        group by month(ss.`Date`), p.Product_Name
-                        order by month(ss.`Date`), p.Product_Category """
+        query = """select month(ss.`date`) as mm, p.product_name as Pname,  p.product_category as category,
+                sum(ss.units) as qty, (p.product_price*sum(ss.units)) as revenue, (p.product_cost*sum(ss.units)) as cv
+            from toysales.sales ss, toysales.stores s , toysales.products p 
+            where s.store_location=%s and year(ss.`date`)=%s and ss.store_ID =s.store_ID and ss.product_ID =p.product_ID 
+            group by month(ss.`date`), p.product_name
+            order by month(ss.`date`), p.product_category """
 
         cursor.execute(query, (loc, anno,))
 
@@ -90,17 +91,19 @@ class DAO():
         return result
 
     @staticmethod
-    def prodByStore(loc, anno):
+    def prod_by_store(loc, anno):
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select p.Product_Name as Pname, s.Store_Name as Sname, i.Stock_On_Hand as stock, sum(ss.Units) as qty, (p.Product_Price* sum(ss.Units)) as revenue, (p.Product_Cost * sum(ss.Units)) as cv
-                    from toysales.stores s, toysales.sales ss, toysales.products p, toysales.inventory i 
-                    where s.Store_ID=ss.Store_ID and p.Product_ID=ss.Product_ID and i.Store_ID =s.Store_ID and i.Product_ID =p.Product_ID and s.Store_Location =%s and year(ss.`Date`)=%s
-                    group by p.Product_Name, s.Store_Name
-                    order by s.Store_Name"""
+        query = """select p.product_name as Pname, s.store_name as Sname, i.stock_on_hand as stock, 
+                sum(ss.units) as qty, (p.product_price* sum(ss.units)) as revenue, (p.product_cost * sum(ss.units)) as cv
+            from toysales.stores s, toysales.sales ss, toysales.products p, toysales.inventory i 
+            where s.store_ID=ss.store_ID and p.product_ID=ss.product_ID and i.store_ID =s.store_ID 
+                and i.product_ID =p.product_ID and s.store_location =%s and year(ss.`date`)=%s
+            group by p.product_name, s.store_name
+            order by s.store_name"""
 
         cursor.execute(query, (loc, anno,))
 
@@ -112,19 +115,19 @@ class DAO():
 
         return result
 
-
     @staticmethod
-    def andamentoNegozio(shop, anno):
+    def andamento_negozio(shop, anno):
         conn = DBConnect.get_connection()
 
         result = []
 
         cursor = conn.cursor(dictionary=True)
-        query = """select month(ss.`Date`) as mm, p.Product_Name as Pname, sum(ss.Units) as qty, (p.Product_Price*sum(ss.Units)) as revenue, (p.Product_Cost*sum(ss.Units)) as cv
-                            from toysales.sales ss, toysales.stores s , toysales.products p 
-                            where ss.Store_ID =s.Store_ID and ss.Product_ID =p.Product_ID and s.Store_Name=%s and year(ss.`Date`)=%s
-                            group by month(ss.`Date`), p.Product_Name
-                            order by month(ss.`Date`)"""
+        query = """select month(ss.`date`) as mm, p.product_name as Pname, sum(ss.units) as qty, 
+                (p.product_price*sum(ss.units)) as revenue, (p.product_cost*sum(ss.units)) as cv
+            from toysales.sales ss, toysales.stores s , toysales.products p 
+            where ss.store_ID =s.store_ID and ss.product_ID =p.product_ID and s.store_name=%s and year(ss.`date`)=%s
+            group by month(ss.`date`), p.product_name
+            order by month(ss.`date`)"""
 
         cursor.execute(query, (shop, anno,))
 
@@ -135,4 +138,3 @@ class DAO():
         conn.close()
 
         return result
-
