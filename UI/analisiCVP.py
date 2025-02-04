@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
 
+
 class Page3(ft.View):
     def __init__(self, page: ft.Page, controller, buttons):
         super(Page3, self).__init__(

@@ -16,6 +16,8 @@ class View(ft.UserControl):
 
         self._controller = None
 
+        self.page0, self.page1, self.page2, self.page3 = None, None, None, None
+
     def load_interface(self):
         """ Carica l'interfaccia e imposta le funzioni per il cambio pagina"""
 
@@ -32,30 +34,26 @@ class View(ft.UserControl):
         self._controller.fill_dd()
 
         def route_change(route):
-            """ Creo le pagine necessarie per l'applicazione """
+
             self.page.views.clear()
 
-            self.pag0 = Page0(self.page, self._controller)
-            self.pag1 = Page1(self.page)
-            self.pag2 = Page2(self.page, self._controller, self.pulsanti1)
-            self.pag3 = Page3(self.page, self._controller, self.pulsanti2)
+            # Creo le pagine necessarie per l'applicazione
+            if route.route == '/':
+                self.pag0 = Page0(self.page, self._controller)
+            if route.route == '/page1':
+                self.pag1 = Page1(self.page)
+            if route.route == '/page2':
+                self.pag2 = Page2(self.page, self._controller, self.pulsanti1)
+            if route.route == '/page3':
+                self.pag3 = Page3(self.page, self._controller, self.pulsanti2)
 
-            # Carico la prima pagina da visualizzare
-            self.page.views.append(self.pag0)
 
             # Richiamo la funzione per cambiare la pagina
             self._controller.change_page()
 
             self.page.update()
 
-        def view_pop(view):
-            """ Funzione per cancellare la pagina precedente"""
-            self.page.views.pop()  # rimuovere l'ultima vista dalla pila delle viste della pagina
-            top_view = self.page.views[-1]  # ricavo la vista attualmente in cima alla pila dopo la rimozione
-            self.page.go(top_view.route)  # vado alla vista attualmente in cima
-
         self.page.on_route_change = route_change
-        self.page.on_view_pop = view_pop
         self.page.go(self.page.route)
 
     @property

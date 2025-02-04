@@ -11,5 +11,5 @@ Istruzioni per l'installazione e l’utilizzo dell’applicazione:
 - Nel file UI/codici.txt è possibile aggiornare l'username e la password che si intendono utilizzare per la fase di login
 - Eseguire la classe Main per avviare l’applicazione
 
-Il video di dimostrazione di utilizzo del software è disponibile al seguente link di Youtube: https://youtu.be/..
+Il video di dimostrazione di utilizzo del software è disponibile al seguente link di Youtube: https://youtu.be/6jwLqSDRHgU
 per ulteriori informazioni consultare il file "relazione tecnica" contenuto nella cartella documents

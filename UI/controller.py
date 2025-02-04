@@ -37,7 +37,7 @@ class Controller:
         # dizionario per memorizzare il risultato della simulazione
         self._ris = {}
 
-# ---------- PAGINA AUTENTICAZIONE ----------
+    # ---------- PAGINA AUTENTICAZIONE ----------
     def login(self, e):
         """ metodo per verificare le credenziali di accesso """
 
@@ -121,6 +121,7 @@ class Controller:
 
         # Mappa delle pagine e delle funzioni da chiamare
         page_functions = {
+            "/": lambda: self._view.page.views.append(self._view.pag0),
             "/page1": lambda: self._view.page.views.append(self._view.pag1),
             "/page2": self.load_page2,
             "/page3": self.load_page3
@@ -139,12 +140,13 @@ class Controller:
         if self._view.pag2:
             self._view.pag2.close_figures()
 
+
         # Inizializza le variabili
         self.yy = [int(self._view.ddAnno.value)]
         self.loc = self._view.ddLoc.value
         self.a1 = []
         self.a2 = []
-
+        print(len(self._view.pag2.tabella21a.columns))
         # Chiama le funzioni
         self.c1()
         self.c2()
@@ -576,6 +578,7 @@ class Controller:
             if self._view.pag2.tabella21b.rows[i].selected is True:
                 t = self._view.pag2.tabella21b.rows[i].cells[0].content.value
                 break
+
         # ricavo la quantità presente a fine luglio 2023 di ogni prodotto del negozio X
         s, q = self._model.get_rimanenze(self.loc, self.yy[-1], t)
         self._view.pag2.ris.controls.append(self.create_text1(f"{t} \n TOT STOCK = {int(sum(q))} unit:", "black", weight=ft.FontWeight.BOLD))
