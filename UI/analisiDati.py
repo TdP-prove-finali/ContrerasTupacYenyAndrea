@@ -14,6 +14,11 @@ class Page2(ft.View):
         )
         self.page = page
         self._controller = controller
+        self.buttons = buttons
+
+        self.load()
+
+    def load(self):
 
         # Creazione pulsanti
         bt1 = self.create_icon_button(ft.icons.UPDATE, "UPDATE PAGE", self._controller.update_page2, "green", "white")
@@ -27,7 +32,6 @@ class Page2(ft.View):
         box = self.axs2a.get_position()
         self.axs2a.set_position([box.x0, box.y0, box.width * 0.90, box.height])
         self.chart2a = MatplotlibChart(self.fig2a, expand=True)
-
 
         # 2.GRAFICO A BARRA PER LE CATEGORIE
         self.fig2b, self.axs2b = plt.subplots(2, 1, figsize=(5.5, 4.4))
@@ -44,7 +48,6 @@ class Page2(ft.View):
         pos = self.axs2d.get_position()
         self.axs2d.set_position([pos.x0, pos.y0, pos.width * 0.9, pos.height])
         self.chart2d = MatplotlibChart(self.fig2d, expand=True)
-
 
         # Creazione tabelle
         # 1.Tabella Prodotti
@@ -109,11 +112,12 @@ class Page2(ft.View):
                          tab_alignment=ft.TabAlignment.CENTER,
                          expand=True
                          )
+        self.initialization = True
 
         self.controls = [
             self.header(),
             self.info_container(self.create_text1("Please select the location and the year\nfor which you would like to view the performance", 18)),
-            self.container_input(buttons, bt1),
+            self.container_input(self.buttons, bt1),
             self.info_container(self.create_text1("RESULT", 27)),
             result
         ]
@@ -291,10 +295,3 @@ class Page2(ft.View):
         return ft.Container(info,
                             alignment=ft.Alignment(0, 0)
                             )
-
-    def close_figures(self):
-        """ Chiude tutte le figure aperte. """
-        plt.close(self.fig2a)
-        plt.close(self.fig2b)
-        plt.close(self.fig2c)
-        plt.close(self.fig2d)

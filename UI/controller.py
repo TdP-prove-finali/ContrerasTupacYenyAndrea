@@ -8,10 +8,15 @@ class Controller:
     def __init__(self, view, model):
         self._model = model
         self._view = view
+        # variabile per memorizzare la pagina attualmente chiamata
+        self.view_active = None
 
         # variabili per memorizzare le credenziali di accesso
         self.un = None
         self.pw = None
+
+    def initialization(self):
+        """ Inizzializazione delle variabili """
 
         # variabili per memorizzare i mesi di ogni relativo anno
         self.mese1 = []
@@ -42,8 +47,8 @@ class Controller:
         """ metodo per verificare le credenziali di accesso """
 
         # memorizzo i dati inseriti dall'utente
-        password = self._view.pag0.password.value
-        username = self._view.pag0.username.value
+        password = self.view_active.password.value
+        username = self.view_active.username.value
 
         # Controllo che i codici di accesso siano stati già memorizzati
         if self.un is None or self.pw is None:
@@ -69,6 +74,10 @@ class Controller:
             return
 
         # superato i vari controlli, posso procedere alla pagina seguente
+        # inizializzo le variabili:
+        self.initialization()
+        self._model.initialization()
+        self.fill_dd()
         self._view.page.go("/page1")
 
         self._view.page.update()
@@ -94,8 +103,6 @@ class Controller:
         self._view.page.open(ft.AlertDialog(
             content=self.create_text1(text, "black"),
             bgcolor="red300",
-
-
         ))
 
     def create_text1(self, testo, color, weight=None):
@@ -116,60 +123,75 @@ class Controller:
 
 # ---------- PAGINA HOME ----------
 
-    def change_page(self):
+    def change_page(self, page):
         """ Metodo per cambiare la pagina """
 
-        # Mappa delle pagine e delle funzioni da chiamare
-        page_functions = {
-            "/": lambda: self._view.page.views.append(self._view.pag0),
-            "/page1": lambda: self._view.page.views.append(self._view.pag1),
-            "/page2": self.load_page2,
-            "/page3": self.load_page3
-        }
+        self._view.page.views.append(page)  # aggiungo alla vista la pagina
+        self.view_active = self._view.page.views[-1]  # memorizzo la pagina attuale
 
-        # Se la pagina è presente nella mappa, chiamala
-        if self._view.page.route in page_functions:
-            page_functions[self._view.page.route]()
+        if page.route == '/page2':
+            self.load_page2()
+        elif page.route == '/page3':
+            self.load_page3()
 
     def load_page2(self):
         """ Inizializza la pagina 2 con i valori e le funzioni necessarie """
-        # carico la pagina
-        self._view.page.views.append(self._view.pag2)
 
-        # Chiudi le figure della pagina precedente se necessario
-        if self._view.pag2:
-            self._view.pag2.close_figures()
+        # Controllo se viene selezionata una località diversa
+        if self._view.ddLoc.value != self.loc:
+            self.loc = self._view.ddLoc.value
+            self.yy = []
+            self.clear_chart(self.view_active.axs2a)
+            self.clear_chart(self.view_active.axs2b[0])
+            self.clear_chart(self.view_active.axs2b[1])
+            self.view_active.c2.controls.clear()
+            self.view_active.c3.controls.clear()
 
+        # Aggiungi l'anno se non è già presente
+        if int(self._view.ddAnno.value) not in self.yy:
+            # memorizzo l'anno selezionato
+            self.yy.append(int(self._view.ddAnno.value))
+            self.a1 = [int(self._view.ddAnno.value)]  # inizializzo l'anno selezionato per l'andamento prodotto X
+            self.a2 = [int(self._view.ddAnno.value)]  # inizializzo l'anno selezionato per l'andamento negozio X
+            self.clear_chart(self.view_active.axs2c)
+            self.clear_chart(self.view_active.axs2d)
 
-        # Inizializza le variabili
-        self.yy = [int(self._view.ddAnno.value)]
-        self.loc = self._view.ddLoc.value
-        self.a1 = []
-        self.a2 = []
-        print(len(self._view.pag2.tabella21a.columns))
-        # Chiama le funzioni
-        self.c1()
-        self.c2()
-        self.c3()
-        self.c4()
-        self.c5()
-        self.c6()
-        self.c7()
-        self.c8()
-        self.stock()
+            # avvio i metodi
+            self.c1()
+            self.c2()
+            self.c3()
+            self.c4()
+            self.c5()
+            self.c6()
+            self.c7()
+            self.c8()
+            self.stock()
 
     def load_page3(self):
         """ Inizializza la pagina 3 con i valori e le funzioni necessarie """
-        # carico la pagina
-        self._view.page.views.append(self._view.pag3)
 
-        # Chiudi le figure della pagina precedente se necessario
-        if self._view.pag3:
-            self._view.pag3.close_figures()
+        # pulisco la lista risultati e alcune variabili
+        self.view_active.l3a.controls.clear()
+        self.view_active.l4a.controls.clear()
+        self.clear_chart(self.view_active.axs3a)
+        self.view_active.vQty.value = ""
+        self.view_active.vCF.value = ""
+        self.view_active.vPr.value = ""
 
         # chiamo le funzioni
         self.c9()
         self.c10()
+
+    def logout(self, e):
+        # pulisco tutto come se stessi chiudendo l'applicazione e iniziando una nuova sessione
+        self._view.pages = {}  # cancello tutte le pagine create
+        # riporto le variabili inizializzate come in principio
+        self.initialization()
+        self._model.initialization()
+
+        self._view.ddAnno.options.clear()
+        self._view.ddLoc.options.clear()
+        self._view.page.go("/")
 
     def fill_dd(self):
         """ metodo per riempire i menu a tendina"""
@@ -198,9 +220,9 @@ class Controller:
 
     def fill_mese(self):
         """ metodo per riempire il menu "month" in base all'anno selezionato"""
-        if self._view.ddAnno.value == '2022':
+        if self._view.ddAnno.value == str(self._view.ddAnno.options[0].key):
             self._view.ddMese.options = self.mese1
-        if self._view.ddAnno.value == '2023':
+        if self._view.ddAnno.value == str(self._view.ddAnno.options[1].key):
             self._view.ddMese.options = self.mese2
 
         # imposto che il primo valore inserito sia selezionato
@@ -239,10 +261,10 @@ class Controller:
 
         # proietto nel grafico l'andamento del profitto mensile ottenuto nell'anno selezionato
         y = np.arange(1, len(m1) + 1)
-        self._view.pag2.axs2a.plot(y, m1, marker=".", label=f"{self.yy[-1]}")
-        self._view.pag2.axs2a.set_title(f"MONTHLY PROFIT", fontdict={'size': 15, 'color': "indigo"})
-        self._view.pag2.axs2a.legend(
-            loc='upper left',       # <-- dove posizionare la legenda
+        self.view_active.axs2a.plot(y, m1, marker=".", label=f"{self.yy[-1]}")
+        self.view_active.axs2a.set_title(f"MONTHLY PROFIT", fontdict={'size': 15, 'color': "indigo"})
+        self.view_active.axs2a.legend(
+            loc='upper left',  # <-- dove posizionare la legenda
             bbox_to_anchor=(1, 1),
             ncol=1,
             borderpad=1,  # <-- spazio nel contorno degli anni
@@ -251,13 +273,12 @@ class Controller:
             shadow=True
         )
 
-
     def c2(self):
         """ Metodo per ottenere alcuni indicatori"""
 
         # richiamo il model per ricavare il tot di negozi presenti nella location selezionata:
         n_store = len(self._model.get_negozi(self.loc))
-        self._view.pag2.t1.value = f"TOTAL OF ALL {n_store} STORES"
+        self.view_active.t1.value = f"TOTAL OF ALL {n_store} STORES"
 
         # proietto il risultato totale delle quantita vendute, dei ricavi e del profitto avuto nell'anno selezionato
         q, r, m = self._model.get_indicatori(self.loc, self.yy[-1])
@@ -272,7 +293,7 @@ class Controller:
                              border_radius=10,
                              border=ft.border.all(1, "black"),
                              ))
-        self._view.pag2.c2.controls.append(colonna)
+        self.view_active.c2.controls.append(colonna)
 
     def c3(self):
         """ metodo per ottenere il negozio che presenta il prodotto più redditizio"""
@@ -290,14 +311,14 @@ class Controller:
                                              )
                                 )
 
-        self._view.pag2.c3.controls.append(ft.Container(ris, bgcolor="white",
-                                                        width=190,
-                                                        height=225,
-                                                        alignment=ft.Alignment(0, 0),
-                                                        border_radius=9,
-                                                        border=ft.border.all(2, "blue800"),
-                                                        )
-                                           )
+        self.view_active.c3.controls.append(ft.Container(ris, bgcolor="white",
+                                                         width=190,
+                                                         height=225,
+                                                         alignment=ft.Alignment(0, 0),
+                                                         border_radius=9,
+                                                         border=ft.border.all(2, "blue800"),
+                                                         )
+                                            )
 
     # 2TAB ------------------------------------------------------------------------------------
     def c4(self):
@@ -321,40 +342,46 @@ class Controller:
         offset = width * multiplier
 
         # proietto nel grafico a barra il profitto annuale e le quantita vendute per ogni categoria di prodotti
-        self._view.pag2.axs2b[0].bar(x + offset, q, width)
-        self._view.pag2.axs2b[0].set_title('QTY SOLD', fontdict={'size': 14, 'color': "INDIGO"})
-        self._view.pag2.axs2b[0].set_xticks(x + offset, m3.keys())
-        self._view.pag2.axs2b[0].set_xlabel('category', fontdict={'size': 18, 'color': "white"})  # <-- per aumentare lo spazio tra i due grafici
+        self.view_active.axs2b[0].bar(x + offset, q, width)
+        self.view_active.axs2b[0].set_title('QTY SOLD', fontdict={'size': 14, 'color': "INDIGO"})
+        self.view_active.axs2b[0].set_xticks(x + offset, m3.keys())
+        self.view_active.axs2b[0].set_xlabel('category', fontdict={'size': 18,
+                                                                   'color': "white"})  # <-- per aumentare lo spazio tra i due grafici
 
-        self._view.pag2.axs2b[1].bar(x + offset, m, width)
-        self._view.pag2.axs2b[1].set_title('TOT PROFIT', fontdict={'size': 14, 'color': "INDIGO"})
-        self._view.pag2.axs2b[1].set_xticks(x + offset, m3.keys())
+        self.view_active.axs2b[1].bar(x + offset, m, width)
+        self.view_active.axs2b[1].set_title('TOT PROFIT', fontdict={'size': 14, 'color': "INDIGO"})
+        self.view_active.axs2b[1].set_xticks(x + offset, m3.keys())
 
-        self._view.pag2.fig2b.tight_layout()
+        self.view_active.fig2b.tight_layout()
 
     def c5(self):
         """ Metodo per generare la tabella 'prodotti' """
 
         # Imposto che inizialmente l'ordinamento si faccia in base alla prima colonna
-        self._view.pag2.tabella21a.sort_column_index = 0
+        self.view_active.tabella21a.sort_column_index = 0
         # Richiamo il model
         m4 = self._model.get_lista_prodotti(self.loc, self.yy[-1])
 
         # Controllo se viene selezionato un anno diverso per la stessa location
         if len(self.yy) < 2:
+            if len(self.view_active.tabella21a.columns) > 2:
+                self.view_active.tabella21a.rows.clear()
+                self.clear_table_columns(self.view_active.tabella21a)
+
             self.ppp = {}
-            self.ppp = {t: (i[0], i[1], i[2]) for t, i in m4.items()}  # Necessario per la stessa location con anno diverso
-            self.aggiungi_colonne(self._view.pag2.tabella21a, self.yy[0])
-            self.aggiungi_righe(m4, self._view.pag2.tabella21a, self.ppp, n_columns=2)
+            self.ppp = {t: (i[0], i[1], i[2]) for t, i in
+                        m4.items()}  # Necessario per la stessa location con anno diverso
+            self.aggiungi_colonne(self.view_active.tabella21a, self.yy[0])
+            self.aggiungi_righe(m4, self.view_active.tabella21a, self.ppp, n_columns=2)
         elif len(self.yy) == 2:
             # Pulisco le righe della tabella
-            self._view.pag2.tabella21a.rows.clear()
-            self.aggiungi_colonne(self._view.pag2.tabella21a, self.yy[1])
-            self.aggiungi_righe(m4, self._view.pag2.tabella21a, self.ppp, n_columns=2, anno=self.yy[0])
+            self.view_active.tabella21a.rows.clear()
+            self.aggiungi_colonne(self.view_active.tabella21a, self.yy[1])
+            self.aggiungi_righe(m4, self.view_active.tabella21a, self.ppp, n_columns=2, anno=self.yy[0])
 
         # Imposto che la prima riga della colonna sia selezionata
-        if self._view.pag2.tabella21a.rows:
-            self._view.pag2.tabella21a.rows[0].selected = True
+        if self.view_active.tabella21a.rows:
+            self.view_active.tabella21a.rows[0].selected = True
 
     def aggiungi_colonne(self, tabella, anno):
         """ Aggiunge le colonne per l'anno specificato """
@@ -440,23 +467,22 @@ class Controller:
 
     def c6(self):
         """ metodo per generare il grafico 'andamento prodotto x' """
-        self.a1.append(int(self._view.ddAnno.value))
 
         # ricavo i valori della cella selezionata
         if self.p is None:
-            for i in range(len(self._view.pag2.tabella21a.rows)):
-                if self._view.pag2.tabella21a.rows[i].selected is True:
+            for i in range(len(self.view_active.tabella21a.rows)):
+                if self.view_active.tabella21a.rows[i].selected is True:
                     # inizializzo la variabile con il nominativo del prodotto selezionato
-                    self.p = self._view.pag2.tabella21a.rows[i].cells[0].content.value
+                    self.p = self.view_active.tabella21a.rows[i].cells[0].content.value
                     break  # aggiunto break per uscire dal for non appena viene trovato il valore true
 
         # richiamo il model:
         m5 = self._model.get_andamento_prodotto(self.loc, self.a1[-1], self.p)
         #  proietto nel grafico l'andamento del profitto mensile avuto nell'anno selezionato per il prodotto X
         y = np.arange(1, len(m5) + 1)
-        self._view.pag2.axs2c.plot(y, m5, marker=".", label=f"{self.a1[-1]}")
-        self._view.pag2.axs2c.set_title(f"TRENDS OF PRODUCT '{self.p}'", fontdict={'size': 11, 'color': "indigo"})
-        self._view.pag2.axs2c.legend(
+        self.view_active.axs2c.plot(y, m5, marker=".", label=f"{self.a1[-1]}")
+        self.view_active.axs2c.set_title(f"TRENDS OF PRODUCT '{self.p}'", fontdict={'size': 11, 'color': "indigo"})
+        self.view_active.axs2c.legend(
             loc='upper left',
             bbox_to_anchor=(1, 1),
             ncol=1,
@@ -469,27 +495,24 @@ class Controller:
     def aggiorna_grafico1(self, e):
         """ metodo per aggiornare il grafico 'andamento prodotto X' """
         t = None
-        for i in range(len(self._view.pag2.tabella21a.rows)):
-            if self._view.pag2.tabella21a.rows[i].selected is True:
-                t = self._view.pag2.tabella21a.rows[i].cells[0].content.value
+        for i in range(len(self.view_active.tabella21a.rows)):
+            if self.view_active.tabella21a.rows[i].selected is True:
+                t = self.view_active.tabella21a.rows[i].cells[0].content.value
                 break
 
         # controllo se il prodotto selezionato è diverso
         if t != self.p:
             # pulisco le variabili
-            self.a1 = []
+            self.a1 = [int(self._view.ddAnno.value)]
             self.p = t
-            self._view.pag2.axs2c.clear()
-
+            self.clear_chart(self.view_active.axs2c)
             # avvio la funzione
             self.c6()
-            self._view.pag2.chart2c.update()
         else:
             # controllo se per lo stesso prodotto è stato selezionato un anno diverso
             if int(self._view.ddAnno.value) not in self.a1:
+                self.a1.append(int(self._view.ddAnno.value))
                 self.c6()
-                self._view.pag2.chart2c.update()
-
         self._view.page.update()
 
     # 3TAB -------------------------------------------------------------------------------
@@ -498,43 +521,45 @@ class Controller:
         """ Metodo per generare la tabella 'negozi' """
 
         # Imposto che inizialmente l'ordinamento si faccia in base alla prima colonna
-        self._view.pag2.tabella21b.sort_column_index = 0
+        self.view_active.tabella21b.sort_column_index = 0
         # Richiamo il model
         m6 = self._model.get_lista_negozi(self.loc, self.yy[-1])
 
         # Controllo se viene selezionato un anno diverso per la stessa location
         if len(self.yy) < 2:
+            if len(self.view_active.tabella21b.columns) > 2:
+                self.view_active.tabella21b.rows.clear()
+                self.clear_table_columns(self.view_active.tabella21b)
             self.sp = {}
             self.sp = {t: (i[0], i[1]) for t, i in m6.items()}  # Necessario per la stessa location con anno diverso
-            self.aggiungi_colonne(self._view.pag2.tabella21b, self.yy[0])
-            self.aggiungi_righe(m6, self._view.pag2.tabella21b, self.sp)
+            self.aggiungi_colonne(self.view_active.tabella21b, self.yy[0])
+            self.aggiungi_righe(m6, self.view_active.tabella21b, self.sp)
         elif len(self.yy) == 2:
             # Pulisco le righe della tabella
-            self._view.pag2.tabella21b.rows.clear()
-            self.aggiungi_colonne(self._view.pag2.tabella21b, self.yy[1])
-            self.aggiungi_righe(m6, self._view.pag2.tabella21b, self.sp, anno=self.yy[0])
+            self.view_active.tabella21b.rows.clear()
+            self.aggiungi_colonne(self.view_active.tabella21b, self.yy[1])
+            self.aggiungi_righe(m6, self.view_active.tabella21b, self.sp, anno=self.yy[0])
 
         # Imposto che la prima riga della colonna sia selezionata
-        if self._view.pag2.tabella21b.rows:
-            self._view.pag2.tabella21b.rows[0].selected = True
+        if self.view_active.tabella21b.rows:
+            self.view_active.tabella21b.rows[0].selected = True
 
     def c8(self):
         """ metodo per generare il grafico 'andamento negozio x' """
         # ricavo i valori della cella selezionata
-        self.a2.append(int(self._view.ddAnno.value))
         if self.n is None:
-            for i in range(len(self._view.pag2.tabella21b.rows)):
-                if self._view.pag2.tabella21b.rows[i].selected is True:
+            for i in range(len(self.view_active.tabella21b.rows)):
+                if self.view_active.tabella21b.rows[i].selected is True:
                     # inizializzo la variabile con il nominativo del prodotto selezionato
-                    self.n = self._view.pag2.tabella21b.rows[i].cells[0].content.value
+                    self.n = self.view_active.tabella21b.rows[i].cells[0].content.value
                     break
         # richiamo il model
         m7 = self._model.get_andamento_negozio(self.n, self.a2[-1])
         #  proietto nel grafico l'andamento del profitto mensile avuto nell'anno selezionato per il negozio X
         y = np.arange(1, len(m7) + 1)
-        self._view.pag2.axs2d.plot(y, m7, marker=".", label=f"{self.a2[-1]}")
-        self._view.pag2.axs2d.set_title(f"TRENDS OF SHOP '{self.n}'", fontdict={'size': 11, 'color': "indigo"})
-        self._view.pag2.axs2d.legend(
+        self.view_active.axs2d.plot(y, m7, marker=".", label=f"{self.a2[-1]}")
+        self.view_active.axs2d.set_title(f"TRENDS OF SHOP '{self.n}'", fontdict={'size': 11, 'color': "indigo"})
+        self.view_active.axs2d.legend(
             loc='upper left',
             bbox_to_anchor=(1, 1),
             ncol=1,
@@ -547,43 +572,44 @@ class Controller:
     def aggiorna_grafico2(self, e):
         """ metodo per aggiornare il grafico 'andamento negozio X' """
         t = None
-        for i in range(len(self._view.pag2.tabella21b.rows)):
-            if self._view.pag2.tabella21b.rows[i].selected is True:
-                t = self._view.pag2.tabella21b.rows[i].cells[0].content.value
+        for i in range(len(self.view_active.tabella21b.rows)):
+            if self.view_active.tabella21b.rows[i].selected is True:
+                t = self.view_active.tabella21b.rows[i].cells[0].content.value
                 break
         # controllo se il negozio selezionato è diverso
         if t != self.n:
             # pulisco le variabili
-            self.a2 = []
+            self.a2 = [int(self._view.ddAnno.value)]
             self.n = t
-            self._view.pag2.axs2d.clear()
+            self.clear_chart(self.view_active.axs2d)
             # avvio le funzioni
             self.c8()
-            self._view.pag2.chart2d.update()
         else:
             # controllo se per lo stesso negozio è stato selezionato un anno diverso
             if int(self._view.ddAnno.value) not in self.a2:
+                self.a2.append(int(self._view.ddAnno.value))
                 self.c8()
-                self._view.pag2.chart2d.update()
 
         self._view.page.update()
 
     def stock(self):
         """ metodo per ricavare lo stock di ogni prodotto nel negozio selezionato"""
 
-        self._view.pag2.ris.controls.clear()
+        self.view_active.ris.controls.clear()
         # ricavo i valori della cella selezionata
         t = None
-        for i in range(len(self._view.pag2.tabella21b.rows)):
-            if self._view.pag2.tabella21b.rows[i].selected is True:
-                t = self._view.pag2.tabella21b.rows[i].cells[0].content.value
+        for i in range(len(self.view_active.tabella21b.rows)):
+            if self.view_active.tabella21b.rows[i].selected is True:
+                t = self.view_active.tabella21b.rows[i].cells[0].content.value
                 break
 
         # ricavo la quantità presente a fine luglio 2023 di ogni prodotto del negozio X
         s, q = self._model.get_rimanenze(self.loc, self.yy[-1], t)
-        self._view.pag2.ris.controls.append(self.create_text1(f"{t} \n TOT STOCK = {int(sum(q))} unit:", "black", weight=ft.FontWeight.BOLD))
+        self.view_active.ris.controls.append(
+            self.create_text1(f"{t} \n TOT STOCK = {int(sum(q))} unit:", "black", weight=ft.FontWeight.BOLD))
         for i in range(len(q)):
-            self._view.pag2.ris.controls.append(self.create_text2(f"{s[i]} = {int(q[i])} unit", align=ft.TextAlign.CENTER))
+            self.view_active.ris.controls.append(
+                self.create_text2(f"{s[i]} = {int(q[i])} unit", align=ft.TextAlign.CENTER))
 
     def aggiorna_button_stock(self, e):
         """ Pulsante per aggiornare lo stock relativo al negozio selezioanto nella tabella """
@@ -592,58 +618,8 @@ class Controller:
 
     def update_page2(self, e):
         """ Aggiorna i dati della pagina 2 """
-
-        # Controllo se viene selezionata una località diversa
-        if self._view.ddLoc.value != self.loc:
-
-            self.loc = self._view.ddLoc.value
-            self.clear_page2_data()
-            self.yy = []
-
-        # Aggiungi l'anno se non è già presente
-        if int(self._view.ddAnno.value) not in self.yy:
-            # memorizzo l'anno selezionato
-            self.yy.append(int(self._view.ddAnno.value))
-            self.a1 = []  # inizializzo l'anno selezionato per l'andamento prodotto X
-            self.a2 = []  # inizializzo l'anno selezionato per l'andamento negozio X
-
-            # avvio i metodi
-            self.c1()
-            self._view.pag2.chart2a.update()
-            self.c2()
-
-            self.c3()
-
-            self.c4()
-            self._view.pag2.chart2b.update()
-            self.c5()
-            self.clear_chart(self._view.pag2.axs2c)
-            self.c6()
-            self._view.pag2.chart2c.update()
-            self.c7()
-            self.clear_chart(self._view.pag2.axs2d)
-            self.c8()
-            self._view.pag2.chart2d.update()
-            self.stock()
-
+        self.load_page2()
         self._view.page.update()
-
-    def clear_page2_data(self):
-        """ Pulisce i dati della pagina 2 """
-
-        self.clear_chart(self._view.pag2.axs2a)
-        self.clear_chart(self._view.pag2.axs2b[0])
-        self.clear_chart(self._view.pag2.axs2b[1])
-        self._view.pag2.c2.controls.clear()
-        self._view.pag2.c3.controls.clear()
-
-        self._view.pag2.tabella21a.rows.clear()
-        self._view.pag2.tabella21b.rows.clear()
-        self.p = None  # inizializzo il prodotto selezionato nella tabella
-        self.n = None  # inizializzo il negozio selezionato nella tabella
-
-        self.clear_table_columns(self._view.pag2.tabella21a)
-        self.clear_table_columns(self._view.pag2.tabella21b)
 
     def clear_chart(self, chart):
         """ Pulisce un grafico specificato """
@@ -669,16 +645,16 @@ class Controller:
     def controllo_input1(self):
         """ Metodo per controllora che siano stati inseriti valori accettabili """
 
-        if not self.controlla_number(self._view.pag3.cf.value):
+        if not self.controlla_number(self.view_active.cf.value):
             self.msg_error("ERROR\nplease, enter a number\nfor CF")
         else:
             # memorizzo il valore inserito
-            self.cf = float(self._view.pag3.cf.value)
+            self.cf = float(self.view_active.cf.value)
 
-        if not self.controlla_number(self._view.pag3.target.value):
+        if not self.controlla_number(self.view_active.target.value):
             self.msg_error("ERROR\nplease, enter a number\nfor TARGET")
         else:
-            self.target = float(self._view.pag3.target.value)
+            self.target = float(self.view_active.target.value)
 
     def controlla_number(self, valore):
         """ metodo per valutare se è stato inserito un numero """
@@ -691,60 +667,61 @@ class Controller:
     def c9(self):
         """ metodo per proiettare i risultati in forma grafica"""
 
-        # pulizia della lista risultati
-        self._view.pag3.l3a.controls.clear()
-        self._view.pag3.l4a.controls.clear()
-
-        self._view.pag3.l3a.controls.append(
+        self.view_active.l3a.controls.append(
             ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER))
 
         # controllo input:
         self.controllo_input1()
 
         # avvio calcolo MDC
-        self._model.calcolo_mdc(self._view.ddShop.value, int(self._view.ddAnno.value), int(self._view.ddMese.value), self.cf, self.target)
+        self._model.calcolo_mdc(self._view.ddShop.value, int(self._view.ddAnno.value), int(self._view.ddMese.value),
+                                self.cf, self.target)
 
         # estrazione dei risultati
         name_prod, q, r, mixx = self._model.get_ris1()
         qbep, rbep, mds, ro = self._model.get_bep_e_mds()
 
-        mdsq = sum(q)-qbep
+        mdsq = sum(q) - qbep
 
         x1 = np.linspace(0, sum(q) + qbep)
         y = self._model.get_retta(self.cf)
 
         # proietto il risultato nel grafico
-        self._view.pag3.axs3a.plot(x1, y[0], ls="-", linewidth=1, label='REVENUE')
-        self._view.pag3.axs3a.plot(x1, y[1], ls="-", linewidth=1, label='CT')
+        self.view_active.axs3a.plot(x1, y[0], ls="-", linewidth=1, label='REVENUE')
+        self.view_active.axs3a.plot(x1, y[1], ls="-", linewidth=1, label='CT')
 
         # imposto il colore tra due rette che si intersecano
         # questo permetterà di indetificare la zona di perdita e la zona di guadagno
-        self._view.pag3.axs3a.fill_between(x1, y[0], y[1], where=(y[0] > y[1]), interpolate=True,
-                                           color="g", alpha=0.3
-                                           )
-        self._view.pag3.axs3a.fill_between(x1, y[0], y[1], where=(y[0] <= y[1]), interpolate=True,
-                                           color="r", alpha=0.3
-                                           )
+        self.view_active.axs3a.fill_between(x1, y[0], y[1], where=(y[0] > y[1]), interpolate=True,
+                                            color="g", alpha=0.3
+                                            )
+        self.view_active.axs3a.fill_between(x1, y[0], y[1], where=(y[0] <= y[1]), interpolate=True,
+                                            color="r", alpha=0.3
+                                            )
         # asse verticale che indica i costi fissi sostenuti
-        self._view.pag3.axs3a.axhline(y=self.cf, ls='-', linewidth=1, label='CF', color='red')
+        self.view_active.axs3a.axhline(y=self.cf, ls='-', linewidth=1, label='CF', color='red')
         # il punto di intersezione
-        self._view.pag3.axs3a.plot(qbep, rbep, marker="o", lw=3, label="BEP", color="r")
+        self.view_active.axs3a.plot(qbep, rbep, marker="o", lw=3, label="BEP", color="r")
 
         # indicazioni aggiuntive se target è zero
         if self.target == 0:
-            self._view.pag3.axs3a.plot([sum(q), sum(q)], [(sum(r)-ro), sum(r)], ls="--", linewidth=2, color="g", label=f'RO')
-            self._view.pag3.l3a.controls.append(self.create_text2(f"the OPERATING INCOME is $ {ro:1.2f}", align=ft.TextAlign.CENTER))
+            self.view_active.axs3a.plot([sum(q), sum(q)], [(sum(r) - ro), sum(r)], ls="--", linewidth=2, color="g",
+                                        label=f'RO')
+            self.view_active.l3a.controls.append(
+                self.create_text2(f"the OPERATING INCOME is $ {ro:1.2f}", align=ft.TextAlign.CENTER))
             if ro > 0:
-                self._view.pag3.axs3a.plot([sum(q), qbep], [0, 0], ls="--", linewidth=2, color="m", label=f'MDS')
-                self._view.pag3.axs3a.plot([0, 0], [sum(r), rbep], ls="--", linewidth=2, color="m")
-                self._view.pag3.l3a.controls.append(self.create_text2(f"the MARGIN OF SAFETY is:\n{mds:1.2f} in sales e {int(mdsq)} in unit", align=ft.TextAlign.CENTER))
+                self.view_active.axs3a.plot([sum(q), qbep], [0, 0], ls="--", linewidth=2, color="m", label=f'MDS')
+                self.view_active.axs3a.plot([0, 0], [sum(r), rbep], ls="--", linewidth=2, color="m")
+                self.view_active.l3a.controls.append(
+                    self.create_text2(f"the MARGIN OF SAFETY is:\n{mds:1.2f} in sales e {int(mdsq)} in unit",
+                                      align=ft.TextAlign.CENTER))
 
-            self._view.pag3.l3a.controls.append(
+            self.view_active.l3a.controls.append(
                 ft.Text(f"--------------", size=18, weight=ft.FontWeight.BOLD, text_align=ft.TextAlign.CENTER))
 
         # Impostazione del titolo e della leggenda
-        self._view.pag3.axs3a.set_title(f"BREAK-EVEN CHART", fontdict={'size': 16, 'color': "INDIGO"})
-        self._view.pag3.axs3a.legend(
+        self.view_active.axs3a.set_title(f"BREAK-EVEN CHART", fontdict={'size': 16, 'color': "INDIGO"})
+        self.view_active.axs3a.legend(
             loc='upper left',
             bbox_to_anchor=(1, 1),
             ncol=1,
@@ -755,19 +732,19 @@ class Controller:
         )
 
         # Linee orizzontali e verticali per il BEP
-        self._view.pag3.axs3a.hlines(y=[rbep, sum(r)], xmin=[0, 0], xmax=[qbep, sum(q)],
-                                     color='lightgrey', linestyle='--', linewidth=0.5)
-        self._view.pag3.axs3a.vlines(x=[qbep, sum(q)], ymin=[0, 0], ymax=[rbep, sum(r)],
-                                     color='lightgrey', linestyle='--', linewidth=0.5)
+        self.view_active.axs3a.hlines(y=[rbep, sum(r)], xmin=[0, 0], xmax=[qbep, sum(q)],
+                                      color='lightgrey', linestyle='--', linewidth=0.5)
+        self.view_active.axs3a.vlines(x=[qbep, sum(q)], ymin=[0, 0], ymax=[rbep, sum(r)],
+                                      color='lightgrey', linestyle='--', linewidth=0.5)
 
         # impostazione dei valori sugli assi
         n1 = [0, int(sum(q))]
         n2 = [0, sum(r), self.cf]
-        self._view.pag3.axs3a.set_xticks(n1)
-        self._view.pag3.axs3a.set_yticks(n2, labels=[f"{i:1.2f}" for i in n2])
-        self._view.pag3.axs3a.annotate('unit', xy=(1, 0), ha='left', va='top', xycoords='axes fraction', fontsize=13)
-        self._view.pag3.axs3a.annotate('$', xy=(0, 1), xytext=(-15, 2), ha='left', va='top', xycoords='axes fraction',
-                                       textcoords='offset points', fontsize=13)
+        self.view_active.axs3a.set_xticks(n1)
+        self.view_active.axs3a.set_yticks(n2, labels=[f"{i:1.2f}" for i in n2])
+        self.view_active.axs3a.annotate('unit', xy=(1, 0), ha='left', va='top', xycoords='axes fraction', fontsize=13)
+        self.view_active.axs3a.annotate('$', xy=(0, 1), xytext=(-15, 2), ha='left', va='top', xycoords='axes fraction',
+                                        textcoords='offset points', fontsize=13)
 
     def c10(self):
         """ metodo per proiettare il mix(ideale) dei ricavi per ogni prodotto"""
@@ -777,63 +754,59 @@ class Controller:
         qbep, rbep, mds, ro = self._model.get_bep_e_mds()
 
         # controllo se il target sia diverso da zero
-
         if self.target == 0:
             # 1. viene mostrato il BEP
-            self._view.pag3.l3a.controls.append(self.create_text2(f"SALES ${rbep:1.2f} are required to BREAK EVEN", align=ft.TextAlign.CENTER))
-            self._view.pag3.l3a.controls.append(self.create_text2(f"The SALES of EACH TOYS must be:", align=ft.TextAlign.CENTER))
+            self.view_active.l3a.controls.append(
+                self.create_text2(f"SALES ${rbep:1.2f} are required to BREAK EVEN", align=ft.TextAlign.CENTER))
+            self.view_active.l3a.controls.append(
+                self.create_text2(f"The SALES of EACH TOYS must be:", align=ft.TextAlign.CENTER))
             for i in range(len(mixx)):
-                self._view.pag3.l3a.controls.append(self.create_text2(f"{name_prod[i]}: ${r[i]:1.2f} --> ${mixx[i]:1.2f}", align=ft.TextAlign.CENTER))
+                self.view_active.l3a.controls.append(
+                    self.create_text2(f"{name_prod[i]}: ${r[i]:1.2f} --> ${mixx[i]:1.2f}", align=ft.TextAlign.CENTER))
 
         elif self.target > 0:
             # 2. viene mostrato il profit target
-            self._view.pag3.l3a.controls.clear()
-            self._view.pag3.l3a.controls.append(self.create_text2(f"SALES ${rbep:1.2f} are required\nto make an OPERATING INCOME of ${self.target}", align=ft.TextAlign.CENTER))
-            self._view.pag3.l3a.controls.append(self.create_text2("the SALES of EACH TOYS must be:", align=ft.TextAlign.CENTER))
+            self.view_active.l3a.controls.clear()
+            self.view_active.l3a.controls.append(
+                self.create_text2(f"SALES ${rbep:1.2f} are required\nto make an OPERATING INCOME of ${self.target}",
+                                  align=ft.TextAlign.CENTER))
+            self.view_active.l3a.controls.append(
+                self.create_text2("the SALES of EACH TOYS must be:", align=ft.TextAlign.CENTER))
             for i in range(len(mixx)):
-                self._view.pag3.l3a.controls.append(self.create_text2(f"{name_prod[i]}: ${r[i]:1.2f} --> ${mixx[i]:1.2f}", align=ft.TextAlign.CENTER))
+                self.view_active.l3a.controls.append(
+                    self.create_text2(f"{name_prod[i]}: ${r[i]:1.2f} --> ${mixx[i]:1.2f}", align=ft.TextAlign.CENTER))
 
     def update_page3(self, e):
         """ Aggiorna i dati della pagina 3 """
-
-        # pulisco le variabili
-        self._view.pag3.l4a.controls.clear()
-        self.clear_chart(self._view.pag3.axs3a)
-
-        # avvio le funzioni
-        self.c9()
-        self._view.pag3.chart3a.update()
-        self.c10()
-
+        self.load_page3()
         self._view.page.update()
 
     def controllo_input2(self):
         """ Metodo per controllare gli input inseriti """
+        # Inizializza le variabili
+        vqty, vpr, vcf = None, None, None
 
-        if not self.controlla_number(self._view.pag3.vQty.value):  # controllo che venga inserito un numero
+        if not self.controlla_number(self.view_active.vQty.value):  # controllo che venga inserito un numero
             self.msg_error("ERROR\nplease, enter a number between 0-100 for ΔQty")
-            return
-        else:
-            # memorizzo il valore
-            vqty = int(self._view.pag3.vQty.value)
-            if not (0 <= vqty <= 100):  # controllo che il numero sia compreso tra 0 e 100
-                self.msg_error("ERROR\nPlease, enter a number between 0-100 for Δqty")
-                return
+            return None, None, None
 
-        if not self.controlla_number(self._view.pag3.vPr.value):
+        vqty = int(self.view_active.vQty.value)
+        if not (0 <= vqty <= 100):  # controllo che il numero sia compreso tra 0 e 100
+            self.msg_error("ERROR\nPlease, enter a number between 0-100 for Δqty")
+            return None, None, None
+
+        if not self.controlla_number(self.view_active.vPr.value):
             self.msg_error("ERROR\nplease, enter a number between 0-100 for ΔPr")
-            return
-        else:
-            vpr = int(self._view.pag3.vPr.value)
-            if not (0 <= vpr <= 100):
-                self.msg_error("ERROR\nPlease, enter a number between 0-100 for Δpr")
-                return
+            return None, None, None
+        vpr = int(self.view_active.vPr.value)
+        if not (0 <= vpr <= 100):
+            self.msg_error("ERROR\nPlease, enter a number between 0-100 for Δpr")
+            return None, None, None
 
-        if not self.controlla_number(self._view.pag3.vCF.value):
+        if not self.controlla_number(self.view_active.vCF.value):
             self.msg_error("ERROR\nplease, enter a number\nfor ΔCF")
-            return
-        else:
-            vcf = int(self._view.pag3.vCF.value)
+            return None, None, None
+        vcf = int(self.view_active.vCF.value)
 
         return vqty, vpr, vcf
 
@@ -841,11 +814,12 @@ class Controller:
         """ calcolo le variazioni apportate ad alcune variabili"""
 
         # pulisco la lista dove verrà visualizzato il risultato della simulazione
-        self._view.pag3.l4a.controls.clear()
+        self.view_active.l4a.controls.clear()
 
         # controllo i valori inseriti
         vqty, vpr, vcf = self.controllo_input2()
-
+        if vqty is None and vpr is None and vcf is None:
+            return
         # nel caso i valori non subiscono variazioni allora non viene avviato la simulazione
         if vqty == 0 and vpr == 0 and vcf == 0:
             return
@@ -858,15 +832,19 @@ class Controller:
 
         # controllo se la tupla di variazioni è contenuta nei risultati ottenuti
         if (vqty, vpr, vcf) not in self.ris.keys():
-            self._view.pag3.l4a.controls.append(self.create_text2("RO decrease", align=ft.TextAlign.CENTER))
+            self.view_active.l4a.controls.append(self.create_text2("RO decrease", align=ft.TextAlign.CENTER))
         else:
-            self._view.pag3.l4a.controls.append(self.create_text2(f"RO increase of ${self.ris.get((vqty, vpr, vcf)):1.2f}", align=ft.TextAlign.CENTER))
+            self.view_active.l4a.controls.append(
+                self.create_text2(f"RO increase of ${self.ris.get((vqty, vpr, vcf)):1.2f}", align=ft.TextAlign.CENTER))
 
         # proietto le soluzioni alternative trovate:
-        self._view.pag3.l4a.controls.append(self.create_text2("other possible solutions are:", align=ft.TextAlign.CENTER))
+        self.view_active.l4a.controls.append(
+            self.create_text2("other possible solutions are:", align=ft.TextAlign.CENTER))
         for t, i in self.ris.items():
             if (vqty, vpr, vcf) != t:
-                self._view.pag3.l4a.controls.append(self.create_text2(f"vqty={int(t[0])}%, vpr={int(t[1])}%, vcf={int(t[2])}\nro={i:1.2f}", align=ft.TextAlign.CENTER))
+                self.view_active.l4a.controls.append(
+                    self.create_text2(f"vqty={int(t[0])}%, vpr={int(t[1])}%, vcf={int(t[2])}\nro={i:1.2f}",
+                                      align=ft.TextAlign.CENTER))
 
         self._view.page.update()
 

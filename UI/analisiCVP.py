@@ -15,8 +15,11 @@ class Page3(ft.View):
         self.page = page
         self.controller3 = controller
 
-        # Chiudi eventuali figure aperte prima di crearne di nuove
-        self.close_figures()
+        self.buttons = buttons
+
+        self.load()
+
+    def load(self):
 
         # Creazione campi di testo
         self.cf = self.create_text_field(' CF ', '4000')
@@ -43,11 +46,13 @@ class Page3(ft.View):
         self.l3a = ft.ListView(expand=True, spacing=4, padding=0)
         self.l4a = ft.ListView(expand=True, spacing=4, padding=0)
 
+        self.initialization = True
+
         # Controlli della pagina
         self.controls = [
             self.header(),
             self.info_container(self.create_text("Please select the four dropdown menus below to extract the sold quantities for each product\nassumed to occur as an average in the month in question.\nIn the 'CF' field, enter the fixed costs that are expected to be incurred,\nIn the 'Target' field, indicate any profit goal you wish to achieve", 18, "white")),
-            self.input_insert(buttons, aggiorna, stampa),
+            self.input_insert(self.buttons, aggiorna, stampa),
             self.info_container(self.create_text("RESULT", 27, "WHITE")),
             self.result()
         ]
@@ -134,7 +139,7 @@ class Page3(ft.View):
         """ Crea contenitore per il body"""
         return ft.Container(ft.Column([ft.Row([self.container_chart(),
                                                self.container_list([self.l3a], 430),
-                                               self.container_list([self.create_text("Please provide the variations of the variables\nto analyze their impact on operating income", 16, "black"),ft.Container(height=2), self.vQty, self.vPr, self.vCF, self.calcolaVar, self.l4a], 280)
+                                               self.container_list([self.create_text("Please provide the variations of the variables\nto analyze their impact on operating income", 16, "black"), ft.Container(height=2), self.vQty, self.vPr, self.vCF, self.calcolaVar, self.l4a], 280)
                                                ],
                                               scroll=ft.ScrollMode.ALWAYS,
                                               )
@@ -197,7 +202,3 @@ class Page3(ft.View):
                             alignment=ft.Alignment(0, 0),
                             padding=0
                             )
-
-    def close_figures(self):
-        """ Chiude tutte le figure aperte. """
-        plt.close("all")

@@ -2,7 +2,7 @@ import flet as ft
 
 
 class Page1(ft.View):
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page, controller):
         super(Page1, self).__init__(
             route="/page1",
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -19,7 +19,7 @@ class Page1(ft.View):
         # creazione pulsanti
         bt1 = self.create_button("DATE ANALYSIS", lambda _: self.page.go("/page2"), "black", "white", "blue100")
         bt2 = self.create_button("CVP ANALYSIS", lambda _: self.page.go("/page3"), "black", "white", "blue100")
-        bt3 = self.create_button("LOGOUT", lambda _: self.page.go("/"), "white", "red", "red900")
+        bt3 = self.create_button("LOGOUT", controller.logout, "white", "red", "red900")
 
         self.controls = [
             titolo,

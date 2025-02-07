@@ -5,7 +5,9 @@ import numpy as np
 
 class Model:
     def __init__(self):
+        pass
 
+    def initialization(self):
         self._prodotti = {i.product_name: i for i in DAO.all_products()}
         """ contiene tutti i prodotti presenti nei punti vendita"""
 
@@ -414,9 +416,3 @@ class Model:
     def get_ris2(self):
         """ Restituisce i risultati della simulazione """
         return self._ris2
-
-
-
-
-
-

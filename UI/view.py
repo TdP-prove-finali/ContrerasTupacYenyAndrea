@@ -16,7 +16,7 @@ class View(ft.UserControl):
 
         self._controller = None
 
-        self.page0, self.page1, self.page2, self.page3 = None, None, None, None
+        self.pages = {}
 
     def load_interface(self):
         """ Carica l'interfaccia e imposta le funzioni per il cambio pagina"""
@@ -31,26 +31,24 @@ class View(ft.UserControl):
         self.pulsanti1 = self.create_container([self.ddLoc, self.ddAnno], 260)
         self.pulsanti2 = self.create_container([self.ddLoc, self.ddShop, self.ddAnno, self.ddMese], 660)
 
-        self._controller.fill_dd()
-
-        def route_change(route):
+        def route_change(event):
+            route = event.route
 
             self.page.views.clear()
 
             # Creo le pagine necessarie per l'applicazione
-            if route.route == '/':
-                self.pag0 = Page0(self.page, self._controller)
-            if route.route == '/page1':
-                self.pag1 = Page1(self.page)
-            if route.route == '/page2':
-                self.pag2 = Page2(self.page, self._controller, self.pulsanti1)
-            if route.route == '/page3':
-                self.pag3 = Page3(self.page, self._controller, self.pulsanti2)
-
+            if route not in self.pages:
+                if route == "/":
+                    self.pages[route] = Page0(self.page, self._controller)
+                if route == "/page1":
+                    self.pages[route] = Page1(self.page, self._controller)
+                if route == "/page2":
+                    self.pages[route] = Page2(self.page, self._controller, self.pulsanti1)
+                if route == "/page3":
+                    self.pages[route] = Page3(self.page, self._controller, self.pulsanti2)
 
             # Richiamo la funzione per cambiare la pagina
-            self._controller.change_page()
-
+            self._controller.change_page(self.pages[route])
             self.page.update()
 
         self.page.on_route_change = route_change
@@ -93,4 +91,3 @@ class View(ft.UserControl):
         return ft.Container(ft.Row(control, alignment=ft.MainAxisAlignment.CENTER),
                             width=width,
                             )
-
