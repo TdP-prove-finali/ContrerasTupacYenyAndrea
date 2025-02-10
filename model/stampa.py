@@ -1,7 +1,7 @@
 import pdfkit
 
 
-class print_file:
+class Stampa:
     def __init__(self, cf, target, name_file):
         """ Inizializza un istanza della classe printF"""
         self._cf = cf
@@ -16,7 +16,7 @@ class print_file:
         """ aggiunge un paragrafo in formato HTML """
         return f'<p>{testo}</p>'
 
-    def generazione_pdf(self, listP, qty, revenue, mixx, qbep, rbep, mds, ro, var):
+    def generazione_pdf(self, list_product, qty, revenue, mixx, rbep, mds, ro, var):
         """  Genera un report in formato HTML e PDF basato sull'analisi cvp"""
 
         # Inizializzazione del contenuti HTNL per la sezione di intestazione
@@ -37,7 +37,7 @@ class print_file:
             l1 += self.add_text(f'SALES $ {rbep:1.2f} are required to make a PROFIT of ${self._target}<br>The SALES of EACH TOYS must be:')
 
         # Creazione della tabella dei proditti
-        l2 = ''.join([self.create_table_row([listP[i], f"{qty[i]} unit", f"${revenue[i]:1.2f}", f"${mixx[i]:1.2f}"]) for i in range(len(listP))])
+        l2 = ''.join([self.create_table_row([list_product[i], f"{qty[i]} unit", f"${revenue[i]:1.2f}", f"${mixx[i]:1.2f}"]) for i in range(len(list_product))])
 
         # Inizializzazione della sezione per le variazioni
         l3 = ''

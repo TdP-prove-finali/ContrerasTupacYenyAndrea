@@ -17,10 +17,6 @@ class Page3(ft.View):
 
         self.buttons = buttons
 
-        self.load()
-
-    def load(self):
-
         # Creazione campi di testo
         self.cf = self.create_text_field(' CF ', '4000')
         self.target = self.create_text_field(" TARGET ", '0')
@@ -45,8 +41,6 @@ class Page3(ft.View):
         # Creazione delle liste
         self.l3a = ft.ListView(expand=True, spacing=4, padding=0)
         self.l4a = ft.ListView(expand=True, spacing=4, padding=0)
-
-        self.initialization = True
 
         # Controlli della pagina
         self.controls = [

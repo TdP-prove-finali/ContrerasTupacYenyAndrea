@@ -16,10 +16,6 @@ class Page2(ft.View):
         self._controller = controller
         self.buttons = buttons
 
-        self.load()
-
-    def load(self):
-
         # Creazione pulsanti
         bt1 = self.create_icon_button(ft.icons.UPDATE, "UPDATE PAGE", self._controller.update_page2, "green", "white")
         bt2 = self.create_button("UPDATE CHART", self._controller.aggiorna_grafico1)
@@ -112,7 +108,6 @@ class Page2(ft.View):
                          tab_alignment=ft.TabAlignment.CENTER,
                          expand=True
                          )
-        self.initialization = True
 
         self.controls = [
             self.header(),

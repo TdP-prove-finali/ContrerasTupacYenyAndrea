@@ -1,7 +1,7 @@
 import flet as ft
 
 import numpy as np
-from model.stampa import print_file
+from model.stampa import Stampa
 
 
 class Controller:
@@ -884,8 +884,8 @@ class Controller:
         name_file = self.msg_print.content.value
 
         # passo i valori da stampare e avvio la generazione del file PDF
-        stampa = print_file(self.cf, self.target, name_file)
-        stampa.generazione_pdf(name_prod, q, r, mixx, qbep, rbep, mds, ro, self.ris)
+        stampa = Stampa(self.cf, self.target, name_file)
+        stampa.generazione_pdf(name_prod, q, r, mixx, rbep, mds, ro, self.ris)
 
         # viene confermato il successo dell'operazione
         msg_conferma = ft.SnackBar(self.create_text1("The document has been saved successfully",

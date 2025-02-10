@@ -67,12 +67,12 @@ class Simulatore:
             # controllo che le soluzioni alternative non  siano state già trovate
             # e che il tempo di esecuzione non sia superiore a 2 secondi
             if n > 0 and t < 2:
-                # carico la coda
+                # controllo che RO calcolato sia positivo
                 if self.ris > 0:
                     # memorizzo le soluzioni trovate
                     self.ro.update({(self.vQty, self.vPr, self.vCF): self.ris})
 
-                # cerco nuove soluzioni alternative:
+                # carico la coda:
                 heapq.heappush(self.queue, (t, 'nuovo', n))
 
         if tipo == 'nuovo':
@@ -86,9 +86,9 @@ class Simulatore:
             # controllo che tutte le combinazioni possibili siano state provate
             # e che il tempo di esecuzione non sia superiore a 2 secondi
             if te < 2 and self.num_combinazioni > 0:
-                self.num_combinazioni -= 1  # decremento il numero di cobinazioni possibili
                 if trovato is True:
-                    # Aggiungo un evento alla coda aggiornando il numero di soluzioni trovate
+                    self.num_combinazioni -= 1  # decremento il numero di cobinazioni possibili
+                    # carico la coda aggiornando il numero di soluzioni trovate e il tempo di esecuzione
                     heapq.heappush(self.queue, (te, 'inizio', n-1))
                 else:
                     heapq.heappush(self.queue, (te, 'nuovo', n))

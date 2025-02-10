@@ -32,6 +32,10 @@ class Model:
         self._d2 = {}
         self._d3 = {}
 
+        # contenente i risultati dell'analisi cvp e variazioni
+        self._ris1 = {}
+        self._ris2 = {}
+
     def get_prodotti(self, nameprod):
         """ metodo che restituisce il prodotto corrispondente al nome fornito """
         return self._prodotti.get(nameprod)
@@ -315,11 +319,11 @@ class Model:
         self.mds = sum(revenue) - self.rbep
 
         # memorizzo i risultati
-        self.ris1 = (name_prod, qty, revenue, mixx)
+        self._ris1 = (name_prod, qty, revenue, mixx)
 
     def get_ris1(self):
         """ Restituisce i risultati calcolati """
-        return self.ris1
+        return self._ris1
 
     def ricorsione2(self, qty, rr, mdc, totq, totr, index=0, wamdc=0, mix=None):
         """ Funzione ricorsiva per calcolare variabili relative a vendite e margini per ogni prodotto """

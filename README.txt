@@ -12,4 +12,4 @@ Istruzioni per l'installazione e l’utilizzo dell’applicazione:
 - Eseguire la classe Main per avviare l’applicazione
 
 Il video di dimostrazione di utilizzo del software è disponibile al seguente link di Youtube: https://youtu.be/6jwLqSDRHgU
-per ulteriori informazioni consultare il file "relazione tecnica" contenuto nella cartella documents
+per ulteriori informazioni consultare il file "relazioneTecnica" contenuto nella cartella documents
