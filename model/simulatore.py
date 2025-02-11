@@ -15,7 +15,7 @@ class Simulatore:
         self.list_vpr = [-50, -40, -30, -25, -20, -15, -10, -5, 5, 10, 15, 20, 25, 30, 40, 50]   # variazioni possibili per pr
         self.list_vcf = list(range(-1400, -49, 50)) + list(range(50, 1401, 50))  # variazioni possibili per cf
         self.tot_soluzioni = 10  # Numero totale di soluzioni alternative da trovare
-        self.num_combinazioni = len(self.list_vpr)*len(self.list_vcf) # numero di combinazioni possibili
+        self.num_combinazioni = len(self.list_vpr)*len(self.list_vcf)  # numero di combinazioni possibili
 
         # Creo una coda per gestire gli eventi
         self.queue = []
